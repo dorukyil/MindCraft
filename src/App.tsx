@@ -3,7 +3,6 @@ import { AdinkraPattern, KentePattern } from './app/components/AdinkraPattern';
 import { MinecraftButton } from './app/components/MinecraftButton';
 import { MinecraftInput } from './app/components/MinecraftInput';
 import { Book, Pickaxe } from 'lucide-react';
-import logoImage from 'figma:asset/4b5f934637a0577892e23ac8303f20cadbf18c27.png';
 
 export default function App() {
   const [email, setEmail] = useState('');
@@ -42,15 +41,15 @@ export default function App() {
               {/* Logo area */}
               <div className="text-center mb-5">
                 <div className="flex items-center justify-center gap-3 mb-3">
-                  <img 
-                    src={logoImage} 
-                    alt="MindCraft Logo" 
-                    className="w-16 h-16"
+                  <img
+                      src="/vite.svg"
+                      alt="MindCraft Logo"
+                      className="w-16 h-16"
                   />
                 </div>
-                
-                <h1 
-                  className="text-4xl mb-1 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+
+                <h1
+                    className="text-4xl mb-1 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
                   style={{
                     fontFamily: 'monospace',
                     imageRendering: 'pixelated',
