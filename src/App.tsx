@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { AdinkraPattern, KentePattern } from './components/AdinkraPattern';
-import { MinecraftButton } from './components/MinecraftButton';
-import { MinecraftInput } from './components/MinecraftInput';
+import { AdinkraPattern, KentePattern } from './app/components/AdinkraPattern';
+import { MinecraftButton } from './app/components/MinecraftButton';
+import { MinecraftInput } from './app/components/MinecraftInput';
 import { Book, Pickaxe } from 'lucide-react';
 import logoImage from 'figma:asset/4b5f934637a0577892e23ac8303f20cadbf18c27.png';
 
