@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
+// NO USE NOW, JUST HAVE FOR LATER
+
 export function Dashboard() {
   const navigate = useNavigate();
 

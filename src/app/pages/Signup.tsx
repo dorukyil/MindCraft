@@ -4,6 +4,8 @@ import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
 import { ArrowLeft } from 'lucide-react';
 
+// Still needs actual working sign-ups + forgot password + email confirmation
+
 export function Signup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
