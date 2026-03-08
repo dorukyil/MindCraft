@@ -3,10 +3,15 @@ import { AdinkraPattern, KentePattern } from './app/components/AdinkraPattern';
 import { MinecraftButton } from './app/components/MinecraftButton';
 import { MinecraftInput } from './app/components/MinecraftInput';
 import { Book, Pickaxe } from 'lucide-react';
+import { RouterProvider } from 'react-router';
+import { router } from './routes';
+
 
 export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  return <RouterProvider router={router} />;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

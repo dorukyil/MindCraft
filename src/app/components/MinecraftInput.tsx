@@ -5,6 +5,7 @@ export function MinecraftInput({
   value,
   onChange,
   id,
+  name,
   required = false
 }: {
   type?: "text" | "password" | "email";
@@ -12,12 +13,14 @@ export function MinecraftInput({
   value?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   id?: string;
+  name?: string;
   required?: boolean;
 }) {
   return (
     <input
       type={type}
       id={id}
+      name={name}
       placeholder={placeholder}
       value={value}
       onChange={onChange}
