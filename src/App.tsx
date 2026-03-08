@@ -35,7 +35,7 @@ export default function App() {
           <div className="relative">
             {/* Main login container */}
             <div 
-              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6"
+              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-8"
               style={{ imageRendering: 'pixelated' }}
             >
               {/* Logo area */}
@@ -49,7 +49,7 @@ export default function App() {
                 </div>
 
                 <h1
-                    className="text-4xl mb-1 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+                    className="text-5xl mb-1 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
                   style={{
                     fontFamily: 'monospace',
                     imageRendering: 'pixelated',
