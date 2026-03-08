@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
+import logoImage from 'figma:asset/4b5f934637a0577892e23ac8303f20cadbf18c27.png';
 
 export function Login() {
   const navigate = useNavigate();
