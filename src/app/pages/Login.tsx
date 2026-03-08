@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
-import logoImage from "../../assets/logo.png";
 
 export function Login() {
   const [email, setEmail] = useState('');
