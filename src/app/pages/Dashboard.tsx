@@ -29,9 +29,9 @@ export function Dashboard() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <ImageWithFallback
-              src="https://images.unsplash.com/photo-1532347833815-3b8e47e7bd7c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtaW5lY3JhZnQlMjBwaWNrYXhlJTIwYm9vayUyMGVkdWNhdGlvbnxlbnwxfHx8fDE3NzI5OTcyNTR8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
+              src = "/mindCraft_logo_border.png"
               alt="MindCraft Logo"
-              className="w-12 h-12 object-cover rounded border-2 border-black"
+              className="w-12 h-12"
             />
             <h1
               className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"

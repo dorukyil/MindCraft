@@ -46,18 +46,6 @@ export function Signup() {
       {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 py-8">
         <div className="w-full max-w-md">
-          {/* Back to login button */}
-          <button
-            onClick={() => navigate('/')}
-            className="mb-3 flex items-center gap-2 px-4 py-2 bg-gradient-to-b from-[#72b149] to-[#55942c] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
-            style={{ imageRendering: 'pixelated', fontFamily: 'monospace' }}
-          >
-            <ArrowLeft className="w-4 h-4 text-white" />
-            <span className="text-white font-bold text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
-              BACK TO LOGIN
-            </span>
-          </button>
-
           {/* Signup card with West African pattern border */}
           <div className="relative">
             {/* Main signup container */}

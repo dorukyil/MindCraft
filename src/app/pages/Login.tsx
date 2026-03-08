@@ -47,7 +47,7 @@ export function Login() {
               <div className="text-center mb-5">
                 <div className="flex items-center justify-center gap-3 mb-3">
                   <img
-                    src={logoImage}
+                    src = "/mindCraft_logo_border.png"
                     alt="MindCraft Logo"
                     className="w-16 h-16"
                   />
