@@ -1,23 +1,30 @@
 import { useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
+import logoImage from 'figma:asset/4b5f934637a0577892e23ac8303f20cadbf18c27.png';
 
 export function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login attempt:', { email, password });
-    // Handle login logic here
+
+    // Simple validation - in a real app, you'd validate against a backend
+    if (email && password) {
+      // Navigate to dashboard on successful login
+      navigate('/dashboard');
+    }
   };
 
   return (
     <div className="size-full min-h-screen relative overflow-hidden bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
       {/* Minecraft sky background */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0" 
+        <div className="absolute inset-0"
           style={{
             backgroundImage: `url('https://minecraft.wiki/images/thumb/Plains_sky.png/1200px-Plains_sky.png')`,
             backgroundSize: 'cover',
@@ -33,21 +40,21 @@ export function Login() {
           {/* Login card with West African pattern border */}
           <div className="relative">
             {/* Main login container */}
-            <div 
+            <div
               className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6"
               style={{ imageRendering: 'pixelated' }}
             >
               {/* Logo area */}
               <div className="text-center mb-5">
                 <div className="flex items-center justify-center gap-3 mb-3">
-                  <img 
-                    src = "/mindCraft_logo_border.png"
-                    alt="MindCraft Logo" 
+                  <img
+                    src={logoImage}
+                    alt="MindCraft Logo"
                     className="w-16 h-16"
                   />
                 </div>
-                
-                <h1 
+
+                <h1
                   className="text-4xl mb-1 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
                   style={{
                     fontFamily: 'monospace',
@@ -57,7 +64,7 @@ export function Login() {
                 >
                   MINDCRAFT
                 </h1>
-                
+
                 <p className="text-[#FCD34D] font-mono text-xs drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
                   Build Your Knowledge, Block by Block
                 </p>
@@ -73,8 +80,8 @@ export function Login() {
               {/* Login form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label 
-                    htmlFor="email" 
+                  <label
+                    htmlFor="email"
                     className="block mb-2 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     USERNAME / EMAIL
@@ -90,8 +97,8 @@ export function Login() {
                 </div>
 
                 <div>
-                  <label 
-                    htmlFor="password" 
+                  <label
+                    htmlFor="password"
                     className="block mb-2 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     PASSWORD
@@ -109,14 +116,14 @@ export function Login() {
                 {/* African pattern decorative element */}
                 <div className="flex items-center justify-between text-xs">
                   <label className="flex items-center gap-2 text-white font-mono cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="w-4 h-4 border-2 border-black"
                     />
                     Remember me
                   </label>
-                  <a 
-                    href="#" 
+                  <a
+                    href="#"
                     className="text-[#FCD34D] font-mono hover:text-[#FBBF24] underline"
                   >
                     Forgot password?
@@ -170,8 +177,8 @@ export function Login() {
               <div className="mt-4 text-center">
                 <p className="text-white font-mono text-xs">
                   New to MindCraft?{' '}
-                  <Link 
-                    to="/signup" 
+                  <Link
+                    to="/signup"
                     className="text-[#FCD34D] hover:text-[#FBBF24] underline font-bold"
                   >
                     Create Account
