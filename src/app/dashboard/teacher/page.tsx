@@ -1,29 +1,27 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router";
 import { supabase } from "../../lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export default function TeacherDashboard() {
   const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) {
-        router.replace("/");
+        navigate("/");
       } else if (data.user.user_metadata?.role !== "teacher") {
-        router.replace("/dashboard");
+        navigate("/dashboard/student");
       } else {
         setUser(data.user);
       }
     });
-  }, [router]);
+  }, [navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.replace("/");
+    navigate("/");
   };
 
   if (!user) return null;

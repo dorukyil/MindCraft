@@ -2,21 +2,26 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
+import { supabase } from '../lib/supabase/client';
 
 export function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
-
-    // Simple validation - in a real app, you'd validate against a backend
-    if (email && password) {
-      // Navigate to dashboard on successful login
+    setError(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setError(error.message);
+    } else {
       navigate('/dashboard');
     }
+    setLoading(false);
   };
 
   return (
@@ -129,8 +134,14 @@ export function Login() {
                   </a>
                 </div>
 
-                <MinecraftButton type="submit" className="w-full">
-                  LOGIN
+                {error && (
+                  <p className="text-red-400 font-mono text-xs drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                    {error}
+                  </p>
+                )}
+
+                <MinecraftButton type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'LOGGING IN...' : 'LOGIN'}
                 </MinecraftButton>
               </form>
 

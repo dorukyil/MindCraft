@@ -1,19 +1,22 @@
 // Minecraft-style blocky button component
-export function MinecraftButton({ 
-  children, 
+export function MinecraftButton({
+  children,
   type = "button",
   className = "",
-  onClick
-}: { 
-  children: React.ReactNode; 
-  type?: "button" | "submit"; 
+  onClick,
+  disabled = false,
+}: {
+  children: React.ReactNode;
+  type?: "button" | "submit";
   className?: string;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
+      disabled={disabled}
       className={`
         relative px-6 py-3 
         bg-gradient-to-b from-[#72b149] to-[#55942c]
@@ -27,6 +30,7 @@ export function MinecraftButton({
         text-white
         text-lg
         hover:brightness-110
+        disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
       `}
       style={{

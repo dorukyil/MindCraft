@@ -3,8 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
 import { ArrowLeft } from 'lucide-react';
-
-// Still needs actual working sign-ups + forgot password + email confirmation
+import { supabase } from '../lib/supabase/client';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -13,6 +12,10 @@ export function Signup() {
     password: '',
     confirmPassword: ''
   });
+  const [role, setRole] = useState<'student' | 'teacher'>('student');
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -21,14 +24,30 @@ export function Signup() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setMessage(null);
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
       return;
     }
-    console.log('Signup attempt:', formData);
-    // Handle signup logic here
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: { data: { role } },
+    });
+    if (error?.message.toLowerCase().includes('already registered')) {
+      setError('An account with this email already exists.');
+    } else if (error) {
+      setError(error.message);
+    } else if (data.user?.identities?.length === 0) {
+      setError('An account with this email already exists.');
+    } else {
+      setMessage('Check your email to confirm your account.');
+    }
+    setLoading(false);
   };
 
   return (
@@ -90,9 +109,27 @@ export function Signup() {
 
               {/* Signup form */}
               <form onSubmit={handleSubmit} className="space-y-2">
+                {/* Role selector */}
+                <div className="flex border-4 border-black overflow-hidden mb-1">
+                  {(['student', 'teacher'] as const).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setRole(r)}
+                      className={`flex-1 py-1.5 font-mono text-xs uppercase transition-colors ${
+                        role === r
+                          ? 'bg-[#72b149] text-white'
+                          : 'bg-[#3C3C3C] text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
+
                 <div>
-                  <label 
-                    htmlFor="email" 
+                  <label
+                    htmlFor="email"
                     className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     EMAIL
@@ -157,8 +194,19 @@ export function Signup() {
                   </label>
                 </div>
 
-                <MinecraftButton type="submit" className="w-full mt-4">
-                  CREATE ACCOUNT
+                {error && (
+                  <p className="text-red-400 font-mono text-xs drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                    {error}
+                  </p>
+                )}
+                {message && (
+                  <p className="text-[#72b149] font-mono text-xs drop-shadow-[1px_1px_0px_rgba(0,0,0,0.5)]">
+                    {message}
+                  </p>
+                )}
+
+                <MinecraftButton type="submit" className="w-full mt-4" disabled={loading}>
+                  {loading ? 'CREATING...' : 'CREATE ACCOUNT'}
                 </MinecraftButton>
               </form>
 
