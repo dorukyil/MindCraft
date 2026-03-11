@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduCraft LMS - BECE & WASSCE Prep</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --minecraft-grass: #7CB342;
+            --minecraft-dirt: #8B4513;
+            --minecraft-stone: #7F8C8D;
+            --minecraft-wood: #C19A6B;
+            --minecraft-gold: #FFD700;
+            --minecraft-diamond: #5DADE2;
+            --minecraft-emerald: #00C853;
+            --minecraft-redstone: #E53935;
+            --minecraft-coal: #37474F;
+            --minecraft-dark: #1a1a1a;
+            --minecraft-sky: #87CEEB;
+        }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(180deg, var(--minecraft-sky) 0%, #B8E6F5 100%);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Minecraft pixelated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Header / Navigation */
+        .minecraft-header {
+            background: var(--minecraft-wood);
+            border: 4px solid var(--minecraft-dirt);
+            box-shadow: 0 8px 0 var(--minecraft-dark);
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 28px;
+            color: var(--minecraft-gold);
+            text-shadow: 3px 3px 0 var(--minecraft-dark);
+            letter-spacing: 2px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: var(--minecraft-stone);
+            border: 3px solid var(--minecraft-dark);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            box-shadow: 0 4px 0 var(--minecraft-dark);
+        }
+
+        .stat-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--minecraft-gold);
+            border: 2px solid var(--minecraft-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            background: var(--minecraft-grass);
+            border: 3px solid var(--minecraft-dark);
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #fff;
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+            transition: transform 0.1s;
+            box-shadow: 0 4px 0 var(--minecraft-dark);
+        }
+
+        .nav-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 var(--minecraft-dark);
+        }
+
+        .nav-tab:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--minecraft-dark);
+        }
+
+        .nav-tab.active {
+            background: var(--minecraft-gold);
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--minecraft-dark);
+        }
+
+        /* Page Content */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .minecraft-card {
+            background: var(--minecraft-wood);
+            border: 4px solid var(--minecraft-dark);
+            box-shadow: 0 6px 0 var(--minecraft-dark);
+            padding: 20px;
+            position: relative;
+        }
+
+        .card-header {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            color: var(--minecraft-gold);
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--minecraft-dark);
+        }
+
+        .card-content {
+            font-size: 20px;
+            line-height: 1.6;
+        }
+
+        /* Progress Bars */
+        .progress-item {
+            margin-bottom: 15px;
+        }
+
+        .progress-label {
+            font-size: 18px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            height: 30px;
+            background: var(--minecraft-dark);
+            border: 3px solid var(--minecraft-dark);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--minecraft-emerald);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #fff;
+            text-shadow: 1px 1px 0 var(--minecraft-dark);
+        }
+
+        /* Achievement Cards */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .achievement {
+            background: var(--minecraft-stone);
+            border: 3px solid var(--minecraft-dark);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 0 var(--minecraft-dark);
+        }
+
+        .achievement:hover {
+            transform: scale(1.05);
+        }
+
+        .achievement.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .achievement-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            background: var(--minecraft-gold);
+            border: 3px solid var(--minecraft-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .achievement.locked .achievement-icon {
+            background: var(--minecraft-coal);
+        }
+
+        /* Lesson Cards */
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .lesson-card {
+            background: linear-gradient(135deg, var(--minecraft-wood) 0%, var(--minecraft-dirt) 100%);
+            border: 4px solid var(--minecraft-dark);
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 6px 0 var(--minecraft-dark);
+            position: relative;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 0 var(--minecraft-dark);
+        }
+
+        .lesson-difficulty {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--minecraft-redstone);
+            border: 2px solid var(--minecraft-dark);
+            padding: 5px 10px;
+            font-size: 14px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .lesson-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            color: var(--minecraft-gold);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+        }
+
+        .lesson-description {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .lesson-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+        }
+
+        /* Essay Submission Form */
+        .essay-form {
+            background: var(--minecraft-wood);
+            border: 4px solid var(--minecraft-dark);
+            padding: 30px;
+            box-shadow: 0 8px 0 var(--minecraft-dark);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            color: var(--minecraft-gold);
+            display: block;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            background: #fff;
+            border: 3px solid var(--minecraft-dark);
+            padding: 12px;
+            font-family: 'VT323', monospace;
+            font-size: 20px;
+            color: var(--minecraft-dark);
+        }
+
+        .form-textarea {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .form-button {
+            background: var(--minecraft-emerald);
+            border: 4px solid var(--minecraft-dark);
+            padding: 15px 40px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            color: #fff;
+            cursor: pointer;
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+            box-shadow: 0 6px 0 var(--minecraft-dark);
+            transition: transform 0.1s;
+        }
+
+        .form-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 var(--minecraft-dark);
+        }
+
+        .form-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0 var(--minecraft-dark);
+        }
+
+        /* File Upload Area */
+        .file-upload {
+            border: 4px dashed var(--minecraft-dark);
+            padding: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .file-upload:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Practice Quiz */
+        .quiz-container {
+            background: var(--minecraft-wood);
+            border: 4px solid var(--minecraft-dark);
+            padding: 30px;
+            box-shadow: 0 8px 0 var(--minecraft-dark);
+        }
+
+        .quiz-question {
+            background: var(--minecraft-stone);
+            border: 3px solid var(--minecraft-dark);
+            padding: 20px;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quiz-option {
+            background: #fff;
+            border: 3px solid var(--minecraft-dark);
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--minecraft-dark);
+            font-size: 18px;
+        }
+
+        .quiz-option:hover {
+            background: var(--minecraft-gold);
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        .quiz-option.selected {
+            background: var(--minecraft-diamond);
+            color: #fff;
+        }
+
+        .quiz-option.correct {
+            background: var(--minecraft-emerald);
+            color: #fff;
+        }
+
+        .quiz-option.incorrect {
+            background: var(--minecraft-redstone);
+            color: #fff;
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            background: var(--minecraft-wood);
+            border: 4px solid var(--minecraft-dark);
+            box-shadow: 0 8px 0 var(--minecraft-dark);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 3px solid var(--minecraft-dark);
+            gap: 20px;
+        }
+
+        .leaderboard-item:nth-child(1) {
+            background: linear-gradient(90deg, var(--minecraft-gold) 0%, var(--minecraft-wood) 100%);
+        }
+
+        .leaderboard-item:nth-child(2) {
+            background: linear-gradient(90deg, #C0C0C0 0%, var(--minecraft-wood) 100%);
+        }
+
+        .leaderboard-item:nth-child(3) {
+            background: linear-gradient(90deg, #CD7F32 0%, var(--minecraft-wood) 100%);
+        }
+
+        .leaderboard-rank {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 24px;
+            min-width: 50px;
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+        }
+
+        .leaderboard-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--minecraft-grass);
+            border: 3px solid var(--minecraft-dark);
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .leaderboard-score {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            color: var(--minecraft-gold);
+            text-shadow: 2px 2px 0 var(--minecraft-dark);
+        }
+
+        /* Study Timer */
+        .timer-display {
+            text-align: center;
+            padding: 40px;
+            background: var(--minecraft-stone);
+            border: 4px solid var(--minecraft-dark);
+            box-shadow: 0 8px 0 var(--minecraft-dark);
+        }
+
+        .timer-time {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 64px;
+            color: var(--minecraft-gold);
+            text-shadow: 4px 4px 0 var(--minecraft-dark);
+            margin-bottom: 30px;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 20px;
+            }
+
+            .nav-tab {
+                font-size: 16px;
+                padding: 10px 16px;
+            }
+
+            .timer-time {
+                font-size: 42px;
+            }
+
+            .card-header {
+                font-size: 14px;
+            }
+        }
+
+        /* Notification Toast */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--minecraft-emerald);
+            border: 4px solid var(--minecraft-dark);
+            padding: 20px;
+            box-shadow: 0 6px 0 var(--minecraft-dark);
+            z-index: 1000;
+            animation: slideIn 0.3s;
+            max-width: 300px;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .gallery-item {
+            border: 4px solid var(--minecraft-dark);
+            box-shadow: 0 4px 0 var(--minecraft-dark);
+            cursor: pointer;
+            transition: transform 0.2s;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="minecraft-header">
+            <div class="header-content">
+                <div class="logo">EDUCRAFT LMS</div>
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="stat-icon">⭐</div>
+                        <span>Level 12</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">💎</div>
+                        <span>2,450 XP</span>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">🔥</div>
+                        <span>7 Day Streak</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="showPage('dashboard')">Dashboard</div>
+                <div class="nav-tab" onclick="showPage('lessons')">Lessons</div>
+                <div class="nav-tab" onclick="showPage('essay')">Essay Portal</div>
+                <div class="nav-tab" onclick="showPage('practice')">Practice</div>
+                <div class="nav-tab" onclick="showPage('progress')">Progress</div>
+                <div class="nav-tab" onclick="showPage('leaderboard')">Leaderboard</div>
+                <div class="nav-tab" onclick="showPage('community')">Community</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page-content active">
+            <div class="dashboard-grid">
+                <div class="minecraft-card">
+                    <div class="card-header">Welcome Back, Student!</div>
+                    <div class="card-content">
+                        <p>You're preparing for BECE & WASSCE exams. Keep up the great work!</p>
+                        <br>
+                        <p>🎯 Today's Goal: Complete 3 lessons</p>
+                        <p>📚 Current Focus: Essay Writing</p>
+                        <p>⏰ Study Time Today: 45 minutes</p>
+                    </div>
+                </div>
+
+                <div class="minecraft-card">
+                    <div class="card-header">Quick Stats</div>
+                    <div class="card-content">
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>BECE Prep</span>
+                                <span>68%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 68%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>WASSCE Prep</span>
+                                <span>45%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Essay Writing</span>
+                                <span>82%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 82%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="minecraft-card">
+                    <div class="card-header">Recent Achievements</div>
+                    <div class="card-content">
+                        <div class="achievements-grid">
+                            <div class="achievement">
+                                <div class="achievement-icon">🏆</div>
+                                <div>First Essay</div>
+                            </div>
+                            <div class="achievement">
+                                <div class="achievement-icon">📖</div>
+                                <div>Bookworm</div>
+                            </div>
+                            <div class="achievement">
+                                <div class="achievement-icon">⚡</div>
+                                <div>Speed Reader</div>
+                            </div>
+                            <div class="achievement locked">
+                                <div class="achievement-icon">👑</div>
+                                <div>Master</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="minecraft-card">
+                <div class="card-header">Continue Learning</div>
+                <div class="card-content">
+                    <div class="lessons-grid">
+                        <div class="lesson-card" onclick="showNotification('Lesson started!')">
+                            <div class="lesson-difficulty">EASY</div>
+                            <div class="lesson-title">Essay Structure</div>
+                            <div class="lesson-description">Learn the fundamentals of essay writing including introduction, body, and conclusion.</div>
+                            <div class="lesson-stats">
+                                <span>⏱️ 15 min</span>
+                                <span>⭐ 100 XP</span>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="showNotification('Lesson started!')">
+                            <div class="lesson-difficulty">MEDIUM</div>
+                            <div class="lesson-title">IE & EI Words</div>
+                            <div class="lesson-description">Master tricky spelling with 'I before E except after C' rule and exceptions.</div>
+                            <div class="lesson-stats">
+                                <span>⏱️ 20 min</span>
+                                <span>⭐ 150 XP</span>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="showNotification('Lesson started!')">
+                            <div class="lesson-difficulty">HARD</div>
+                            <div class="lesson-title">Narrative Composition</div>
+                            <div class="lesson-description">Write compelling narratives with proper character development and plot structure.</div>
+                            <div class="lesson-stats">
+                                <span>⏱️ 30 min</span>
+                                <span>⭐ 250 XP</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons Page -->
+        <div id="lessons" class="page-content">
+            <div class="minecraft-card" style="margin-bottom: 20px;">
+                <div class="card-header">BECE & WASSCE Curriculum</div>
+                <div class="card-content">
+                    <p>Comprehensive lessons covering all exam topics with interactive exercises and gamified learning.</p>
+                </div>
+            </div>
+
+            <div class="lessons-grid">
+                <div class="lesson-card" onclick="showNotification('Lesson: Essay Writing started!')">
+                    <div class="lesson-difficulty">EASY</div>
+                    <div class="lesson-title">Essay Writing Basics</div>
+                    <div class="lesson-description">Understanding essay structure, thesis statements, and paragraph organization.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 15 min</span>
+                        <span>⭐ 100 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Spelling started!')">
+                    <div class="lesson-difficulty">EASY</div>
+                    <div class="lesson-title">Tricky Spelling</div>
+                    <div class="lesson-description">Master IE/EI words, common mistakes, and spelling rules with interactive practice.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 20 min</span>
+                        <span>⭐ 120 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Narrative started!')">
+                    <div class="lesson-difficulty">MEDIUM</div>
+                    <div class="lesson-title">Narrative Composition</div>
+                    <div class="lesson-description">Create engaging stories with proper plot structure, dialogue, and descriptive writing.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 25 min</span>
+                        <span>⭐ 180 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Argumentative started!')">
+                    <div class="lesson-difficulty">MEDIUM</div>
+                    <div class="lesson-title">Writing to Argue</div>
+                    <div class="lesson-description">Develop persuasive arguments with evidence, counterarguments, and logical structure.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 30 min</span>
+                        <span>⭐ 200 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Newspaper started!')">
+                    <div class="lesson-difficulty">HARD</div>
+                    <div class="lesson-title">Newspaper Articles</div>
+                    <div class="lesson-description">Write journalistic pieces with headlines, lead paragraphs, and inverted pyramid structure.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 35 min</span>
+                        <span>⭐ 250 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Grammar started!')">
+                    <div class="lesson-difficulty">MEDIUM</div>
+                    <div class="lesson-title">Grammar Mastery</div>
+                    <div class="lesson-description">Perfect your grammar skills with tenses, subject-verb agreement, and punctuation.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 40 min</span>
+                        <span>⭐ 220 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Vocabulary started!')">
+                    <div class="lesson-difficulty">EASY</div>
+                    <div class="lesson-title">Vocabulary Building</div>
+                    <div class="lesson-description">Expand your vocabulary with context clues, synonyms, and word families.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 20 min</span>
+                        <span>⭐ 150 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Comprehension started!')">
+                    <div class="lesson-difficulty">HARD</div>
+                    <div class="lesson-title">Reading Comprehension</div>
+                    <div class="lesson-description">Improve reading skills with inference, analysis, and critical thinking strategies.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 45 min</span>
+                        <span>⭐ 300 XP</span>
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="showNotification('Lesson: Exam Strategy started!')">
+                    <div class="lesson-difficulty">MEDIUM</div>
+                    <div class="lesson-title">Exam Strategies</div>
+                    <div class="lesson-description">Time management, question analysis, and test-taking techniques for success.</div>
+                    <div class="lesson-stats">
+                        <span>⏱️ 25 min</span>
+                        <span>⭐ 180 XP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Essay Portal Page -->
+        <div id="essay" class="page-content">
+            <div class="essay-form">
+                <div class="card-header" style="font-size: 24px; margin-bottom: 25px;">Submit Your Essay</div>
+                
+                <div class="form-group">
+                    <label class="form-label">Essay Type</label>
+                    <select class="form-select">
+                        <option>Narrative Composition</option>
+                        <option>Argumentative Essay</option>
+                        <option>Newspaper Article</option>
+                        <option>Descriptive Writing</option>
+                        <option>Letter Writing</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Essay Title</label>
+                    <input type="text" class="form-input" placeholder="Enter your essay title...">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Your Essay (Typed or Upload Image)</label>
+                    <textarea class="form-textarea" placeholder="Type your essay here or upload a photo of your handwritten essay below..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Upload Handwritten Essay (Optional)</label>
+                    <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📄</div>
+                        <div style="font-size: 20px;">Click to upload image of handwritten essay</div>
+                        <div style="font-size: 16px; opacity: 0.7; margin-top: 5px;">Supports: JPG, PNG, PDF</div>
+                    </div>
+                    <input type="file" id="fileInput" style="display: none;" accept="image/*,.pdf">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Feedback Type</label>
+                    <select class="form-select">
+                        <option>AI Feedback (Instant)</option>
+                        <option>Teacher Feedback (24-48 hours)</option>
+                        <option>Both AI & Teacher</option>
+                    </select>
+                </div>
+
+                <button class="form-button" onclick="showNotification('Essay submitted! AI analysis in progress...')">Submit Essay</button>
+            </div>
+
+            <div class="minecraft-card" style="margin-top: 30px;">
+                <div class="card-header">Previous Submissions</div>
+                <div class="card-content">
+                    <div style="padding: 20px 0; border-bottom: 3px solid var(--minecraft-dark);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="font-size: 20px; font-weight: bold;">My School Life - Narrative</span>
+                            <span style="color: var(--minecraft-emerald); font-size: 20px;">✓ Reviewed</span>
+                        </div>
+                        <div style="font-size: 18px; opacity: 0.8;">Score: 85/100 | Submitted: 3 days ago</div>
+                    </div>
+                    <div style="padding: 20px 0; border-bottom: 3px solid var(--minecraft-dark);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="font-size: 20px; font-weight: bold;">Climate Change Arguments</span>
+                            <span style="color: var(--minecraft-gold); font-size: 20px;">⏳ Pending</span>
+                        </div>
+                        <div style="font-size: 18px; opacity: 0.8;">Submitted: 1 day ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Page -->
+        <div id="practice" class="page-content">
+            <div class="quiz-container">
+                <div class="card-header" style="font-size: 24px; margin-bottom: 25px;">Practice Quiz: IE & EI Words</div>
+                
+                <div class="quiz-question">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Question 1: Which spelling is correct?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">A) recieve</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">B) receive</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">C) recive</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">D) reciave</div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Question 2: Complete the sentence: "I don't _____ his story."</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">A) beleive</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">B) believe</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">C) beleve</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">D) beleave</div>
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div style="font-weight: bold; margin-bottom: 15px;">Question 3: Which word is an EXCEPTION to the "I before E" rule?</div>
+                    <div class="quiz-options">
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">A) grief</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">B) believe</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">C) neighbour</div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">D) retrieve</div>
+                    </div>
+                </div>
+
+                <button class="form-button" style="margin-top: 20px;" onclick="showNotification('Quiz completed! +150 XP earned!')">Submit Answers</button>
+            </div>
+
+            <div class="minecraft-card" style="margin-top: 30px;">
+                <div class="card-header">Study Timer</div>
+                <div class="card-content">
+                    <div class="timer-display">
+                        <div class="timer-time" id="timerDisplay">25:00</div>
+                        <div class="timer-controls">
+                            <button class="form-button" onclick="startTimer()">Start</button>
+                            <button class="form-button" style="background: var(--minecraft-redstone);" onclick="pauseTimer()">Pause</button>
+                            <button class="form-button" style="background: var(--minecraft-stone);" onclick="resetTimer()">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Page -->
+        <div id="progress" class="page-content">
+            <div class="dashboard-grid">
+                <div class="minecraft-card">
+                    <div class="card-header">Overall Progress</div>
+                    <div class="card-content">
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Total Completion</span>
+                                <span>56%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 56%">56%</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; font-size: 20px;">
+                            <p>📚 Lessons Completed: 28/50</p>
+                            <p>✍️ Essays Submitted: 12</p>
+                            <p>🎯 Quizzes Passed: 34</p>
+                            <p>⏰ Total Study Time: 42 hours</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="minecraft-card">
+                    <div class="card-header">Skills Breakdown</div>
+                    <div class="card-content">
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Essay Writing</span>
+                                <span>82%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 82%; background: var(--minecraft-gold);"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Grammar</span>
+                                <span>75%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%; background: var(--minecraft-diamond);"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Vocabulary</span>
+                                <span>68%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 68%; background: var(--minecraft-emerald);"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-label">
+                                <span>Reading Comp.</span>
+                                <span>71%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 71%; background: var(--minecraft-redstone);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="minecraft-card">
+                    <div class="card-header">Weekly Activity</div>
+                    <div class="card-content">
+                        <div style="font-size: 20px;">
+                            <p>📅 Monday: 1.5 hours ✓</p>
+                            <p>📅 Tuesday: 2 hours ✓</p>
+                            <p>📅 Wednesday: 1 hour ✓</p>
+                            <p>📅 Thursday: 2.5 hours ✓</p>
+                            <p>📅 Friday: 1.5 hours ✓</p>
+                            <p>📅 Saturday: 3 hours ✓</p>
+                            <p>📅 Sunday: 0.5 hours</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="minecraft-card" style="margin-top: 20px;">
+                <div class="card-header">All Achievements</div>
+                <div class="card-content">
+                    <div class="achievements-grid">
+                        <div class="achievement">
+                            <div class="achievement-icon">🏆</div>
+                            <div>First Essay</div>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon">📖</div>
+                            <div>Bookworm</div>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon">⚡</div>
+                            <div>Speed Reader</div>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon">🔥</div>
+                            <div>7 Day Streak</div>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon">✍️</div>
+                            <div>Essay Master</div>
+                        </div>
+                        <div class="achievement">
+                            <div class="achievement-icon">🎯</div>
+                            <div>Quiz Champion</div>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">👑</div>
+                            <div>Grammar King</div>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">💎</div>
+                            <div>Perfect Score</div>
+                        </div>
+                        <div class="achievement locked">
+                            <div class="achievement-icon">🌟</div>
+                            <div>100% Complete</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaderboard Page -->
+        <div id="leaderboard" class="page-content">
+            <div class="leaderboard">
+                <div class="card-header" style="padding: 20px; font-size: 24px;">Top Students This Month</div>
+                
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">#1</div>
+                    <div class="leaderboard-avatar">👤</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Aminata Kamara</div>
+                        <div>Level 18 • 7,850 XP</div>
+                    </div>
+                    <div class="leaderboard-score">7,850</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">#2</div>
+                    <div class="leaderboard-avatar">👤</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Mohamed Sesay</div>
+                        <div>Level 17 • 7,320 XP</div>
+                    </div>
+                    <div class="leaderboard-score">7,320</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">#3</div>
+                    <div class="leaderboard-avatar">👤</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Fatmata Bangura</div>
+                        <div>Level 16 • 6,890 XP</div>
+                    </div>
+                    <div class="leaderboard-score">6,890</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">#4</div>
+                    <div class="leaderboard-avatar">👤</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Ibrahim Turay</div>
+                        <div>Level 15 • 6,450 XP</div>
+                    </div>
+                    <div class="leaderboard-score">6,450</div>
+                </div>
+
+                <div class="leaderboard-item">
+                    <div class="leaderboard-rank">#5</div>
+                    <div class="leaderboard-avatar">👤</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">Isatu Koroma</div>
+                        <div>Level 14 • 5,920 XP</div>
+                    </div>
+                    <div class="leaderboard-score">5,920</div>
+                </div>
+
+                <div class="leaderboard-item" style="background: var(--minecraft-diamond);">
+                    <div class="leaderboard-rank">#12</div>
+                    <div class="leaderboard-avatar">👤</div>
+                    <div class="leaderboard-info">
+                        <div class="leaderboard-name">You</div>
+                        <div>Level 12 • 2,450 XP</div>
+                    </div>
+                    <div class="leaderboard-score">2,450</div>
+                </div>
+            </div>
+
+            <div class="minecraft-card" style="margin-top: 30px;">
+                <div class="card-header">Class Rankings</div>
+                <div class="card-content">
+                    <div style="font-size: 20px;">
+                        <p>🏫 Your Class: Form 3A</p>
+                        <p>👥 Total Students: 45</p>
+                        <p>📊 Your Rank: 8th</p>
+                        <p>📈 Improved by 3 positions this week!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Page -->
+        <div id="community" class="page-content">
+            <div class="minecraft-card" style="margin-bottom: 20px;">
+                <div class="card-header">Student Community</div>
+                <div class="card-content">
+                    <p style="font-size: 20px;">Connect with fellow students preparing for BECE & WASSCE exams. Share experiences, study tips, and support each other!</p>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="minecraft-card">
+                    <div class="card-header">Photos from Students</div>
+                    <div class="card-content">
+                        <div class="image-gallery" style="grid-template-columns: repeat(2, 1fr);">
+                            <div class="gallery-item">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%237CB342' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='VT323' font-size='24' fill='white'%3EStudents Learning%3C/text%3E%3C/svg%3E" alt="Students in computer lab">
+                            </div>
+                            <div class="gallery-item">
+                                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%238B4513' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='VT323' font-size='24' fill='white'%3ESchool Campus%3C/text%3E%3C/svg%3E" alt="School building">
+                            </div>
+                        </div>
+                        <p style="margin-top: 15px; font-size: 18px; opacity: 0.8;">Students from across Sierra Leone using EduCraft for exam prep!</p>
+                    </div>
+                </div>
+
+                <div class="minecraft-card">
+                    <div class="card-header">Study Groups</div>
+                    <div class="card-content">
+                        <div style="font-size: 20px; line-height: 1.8;">
+                            <p>📚 Essay Writing Group - 28 members</p>
+                            <p>🔤 Grammar Masters - 35 members</p>
+                            <p>📖 Reading Club - 42 members</p>
+                            <p>✍️ WASSCE Prep 2026 - 156 members</p>
+                            <button class="form-button" style="margin-top: 15px; font-size: 14px; padding: 10px 20px;" onclick="showNotification('Joined study group!')">Join a Group</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="minecraft-card">
+                    <div class="card-header">Success Stories</div>
+                    <div class="card-content">
+                        <div style="font-size: 18px; line-height: 1.8;">
+                            <p>"EduCraft helped me improve my essay writing from 60% to 85%! The AI feedback is amazing." - <strong>Sarah K.</strong></p>
+                            <br>
+                            <p>"I love the gamification! It makes studying fun and I look forward to earning XP every day." - <strong>James M.</strong></p>
+                            <br>
+                            <p>"The offline feature saved me! I live in a rural area and can now study anytime." - <strong>Fatima B.</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="minecraft-card" style="margin-top: 20px;">
+                <div class="card-header">Discussion Forum</div>
+                <div class="card-content">
+                    <div style="border-bottom: 3px solid var(--minecraft-dark); padding: 15px 0;">
+                        <div style="font-size: 20px; font-weight: bold; margin-bottom: 5px;">📝 Tips for BECE Essay Writing?</div>
+                        <div style="font-size: 18px; opacity: 0.8;">Posted by Aminata • 24 replies • 2 hours ago</div>
+                    </div>
+                    <div style="border-bottom: 3px solid var(--minecraft-dark); padding: 15px 0;">
+                        <div style="font-size: 20px; font-weight: bold; margin-bottom: 5px;">📚 Best study schedule for WASSCE?</div>
+                        <div style="font-size: 18px; opacity: 0.8;">Posted by Mohamed • 18 replies • 5 hours ago</div>
+                    </div>
+                    <div style="padding: 15px 0;">
+                        <div style="font-size: 20px; font-weight: bold; margin-bottom: 5px;">✍️ How to improve handwriting?</div>
+                        <div style="font-size: 18px; opacity: 0.8;">Posted by Ibrahim • 31 replies • 1 day ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notification" class="notification">
+        <div style="font-family: 'Press Start 2P', cursive; font-size: 14px; margin-bottom: 10px;">SUCCESS!</div>
+        <div id="notificationText" style="font-size: 18px;"></div>
+    </div>
+
+    <script>
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Notification System
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notificationText');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Quiz Answer Checking
+        function checkAnswer(element, isCorrect) {
+            // Remove previous selections in this question
+            const options = element.parentElement.querySelectorAll('.quiz-option');
+            options.forEach(opt => {
+                opt.classList.remove('selected', 'correct', 'incorrect');
+            });
+            
+            // Mark selected answer
+            if (isCorrect) {
+                element.classList.add('correct');
+                showNotification('Correct! +10 XP');
+            } else {
+                element.classList.add('incorrect');
+                showNotification('Try again!');
+            }
+        }
+
+        // Timer Functions
+        let timerInterval;
+        let timeLeft = 25 * 60; // 25 minutes in seconds
+
+        function startTimer() {
+            if (timerInterval) return; // Prevent multiple intervals
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    showNotification('Study session complete! +50 XP');
+                    timeLeft = 25 * 60;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+            
+            showNotification('Timer started!');
+        }
+
+        function pauseTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                showNotification('Timer paused');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timeLeft = 25 * 60;
+            updateTimerDisplay();
+            showNotification('Timer reset');
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // File Upload Handler
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                showNotification('File uploaded: ' + e.target.files[0].name);
+            }
+        });
+
+        // Initialize
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
