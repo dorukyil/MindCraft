@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase/client';
 export function Signup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -36,7 +37,7 @@ export function Signup() {
     const { data, error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
-      options: { data: { role } },
+      options: { data: { role, full_name: formData.fullName } },
     });
     if (error?.message.toLowerCase().includes('already registered')) {
       setError('An account with this email already exists.');
@@ -125,6 +126,24 @@ export function Signup() {
                       {r}
                     </button>
                   ))}
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                  >
+                    FULL NAME
+                  </label>
+                  <MinecraftInput
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    placeholder="Alex Johnson"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    required
+                  />
                 </div>
 
                 <div>
@@ -220,7 +239,10 @@ export function Signup() {
               {/* Google signup button */}
               <button
                 type="button"
-                onClick={() => console.log('Google signup clicked')}
+                onClick={() => supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: { redirectTo: 'http://localhost:5173/auth/callback' },
+                })}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:translate-x-[2px] active:translate-y-[2px] transition-all hover:bg-gray-50"
                 style={{ imageRendering: 'pixelated', fontFamily: 'monospace' }}
               >

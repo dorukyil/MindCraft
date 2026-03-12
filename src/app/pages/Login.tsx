@@ -155,7 +155,10 @@ export function Login() {
               {/* Google login button */}
               <button
                 type="button"
-                onClick={() => console.log('Google login clicked')}
+                onClick={() => supabase.auth.signInWithOAuth({
+                  provider: 'google',
+                  options: { redirectTo: 'https://zxbzwgidcygnacnnebzv.supabase.co/auth/v1/callback' },
+                })}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:translate-x-[2px] active:translate-y-[2px] transition-all hover:bg-gray-50"
                 style={{ imageRendering: 'pixelated', fontFamily: 'monospace' }}
               >

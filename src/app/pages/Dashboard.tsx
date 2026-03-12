@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, Clock, CheckCircle, Lock } from 'lucide-react';
+import { supabase } from '../lib/supabase/client';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
@@ -91,6 +93,19 @@ const statusConfig = {
 
 export function Dashboard() {
   const navigate = useNavigate();
+  const [firstName, setFirstName] = useState('');
+  const [role, setRole] = useState('');
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      const meta = user.user_metadata;
+      // Google stores name as full_name; manual signup stores it the same way
+      const fullName: string = meta?.full_name ?? meta?.name ?? '';
+      setFirstName(fullName.split(' ')[0]);
+      setRole(meta?.role ?? '');
+    });
+  }, []);
 
   const handleLogout = () => {
     navigate('/');
@@ -147,7 +162,7 @@ export function Dashboard() {
                   className="text-2xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
                   style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
                 >
-                  WELCOME BACK!
+                  WELCOME BACK{role ? ` ${role.toUpperCase()}` : ''}{firstName ? ` ${firstName.toUpperCase()}` : ''}!
                 </h2>
                 <p className="text-[#FCD34D] font-mono text-xs mt-1 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
                   Build Your Knowledge, Block by Block
