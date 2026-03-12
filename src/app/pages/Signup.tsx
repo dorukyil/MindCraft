@@ -4,6 +4,7 @@ import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -209,7 +210,46 @@ export function Signup() {
                     className="w-4 h-4 border-2 border-black mt-0.5"
                   />
                   <label htmlFor="terms" className="text-white font-mono cursor-pointer">
-                    I agree to the Terms of Service and Privacy Policy
+                    I agree to the{' '}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button type="button" className="text-[#FCD34D] underline hover:text-[#FBBF24]">
+                          Terms of Service
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[70vh] overflow-y-auto bg-[#976d4c] border-4 border-black text-white font-mono">
+                        <DialogHeader>
+                          <DialogTitle className="text-white font-mono text-lg drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]">
+                            TERMS OF SERVICE
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3 text-xs text-white/90 leading-relaxed">
+                          <p><strong>Last updated: March 2026</strong></p>
+                          <p>Enter boring stuff here before the deadline</p>
+                        
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    {' '}and{' '}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button type="button" className="text-[#FCD34D] underline hover:text-[#FBBF24]">
+                          Privacy Policy
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent className="max-h-[70vh] overflow-y-auto bg-[#976d4c] border-4 border-black text-white font-mono">
+                        <DialogHeader>
+                          <DialogTitle className="text-white font-mono text-lg drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]">
+                            PRIVACY POLICY
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-3 text-xs text-white/90 leading-relaxed">
+                          <p><strong>Last updated: March 2026</strong></p>
+                          <p>We're not going to sell your stuff</p>
+                          
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </label>
                 </div>
 
