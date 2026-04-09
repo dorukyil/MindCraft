@@ -4,12 +4,17 @@ import { Signup } from './app/pages/Signup';
 import { Dashboard } from './app/pages/Dashboard';
 import { AuthCallback } from './app/auth/callback/page';
 import { SelectRole } from './app/pages/SelectRole';
+import { Landing } from './app/pages/Landing';
 import { LessonPage } from './app/pages/LessonPage';
 import { TeacherLessonView } from './app/pages/TeacherLessonView';
 
 export const router = createBrowserRouter([
   {
     path: '/',
+    Component: Landing,
+  },
+  {
+    path: '/login',
     Component: Login,
   },
   {

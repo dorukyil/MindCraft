@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2 } from 'lucide-react';
-import { supabase } from '../lib/supabase/client';
 import { lessons } from '../../data/lessons';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
@@ -57,6 +56,7 @@ function TeacherDashboard({
   const [avgScores, setAvgScores] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
 
+  // Mock user data - in a real app this would come from authentication
   useEffect(() => {
     async function fetchStats() {
       const { data } = await supabase
@@ -248,7 +248,8 @@ function StudentDashboard({
   }
 
   return (
-    <div className="size-full min-h-screen relative overflow-hidden bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+    <div className="min-h-screen relative bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+      {/* Minecraft sky background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0"
           style={{

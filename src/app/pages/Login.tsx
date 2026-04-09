@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
-import { supabase } from '../lib/supabase/client';
+import { Home } from 'lucide-react';
 
 export function Login() {
   const navigate = useNavigate();
@@ -15,13 +15,24 @@ export function Login() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
+
+    // Simple frontend validation
+    if (email && password) {
+      // Simulate a brief loading state
+      setTimeout(() => {
+        navigate('/dashboard');
+        setLoading(false);
+      }, 500);
     } else {
-      navigate('/dashboard');
+      setError('Please enter both email and password');
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const handleGoogleLogin = () => {
+    console.log('Google login clicked');
+    // In a real app, this would trigger OAuth flow
+    navigate('/dashboard');
   };
 
   return (
@@ -36,6 +47,16 @@ export function Login() {
             imageRendering: 'pixelated'
           }}
         />
+      </div>
+
+      {/* Back to Home Button */}
+      <div className="absolute top-4 right-4 z-20">
+        <MinecraftButton onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2">
+            <Home size={16} />
+            HOME
+          </div>
+        </MinecraftButton>
       </div>
 
       {/* Main content */}
@@ -155,10 +176,7 @@ export function Login() {
               {/* Google login button */}
               <button
                 type="button"
-                onClick={() => supabase.auth.signInWithOAuth({
-                  provider: 'google',
-                  options: { redirectTo: 'https://zxbzwgidcygnacnnebzv.supabase.co/auth/v1/callback' },
-                })}
+                onClick={handleGoogleLogin}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:translate-x-[2px] active:translate-y-[2px] transition-all hover:bg-gray-50"
                 style={{ imageRendering: 'pixelated', fontFamily: 'monospace' }}
               >
