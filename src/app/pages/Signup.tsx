@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
 import { ArrowLeft } from 'lucide-react';
-import { supabase } from '../lib/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 
 export function Signup() {
@@ -35,28 +34,28 @@ export function Signup() {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: { data: { role, full_name: formData.fullName } },
-    });
-    if (error?.message.toLowerCase().includes('already registered')) {
-      setError('An account with this email already exists.');
-    } else if (error) {
-      setError(error.message);
-    } else if (data.user?.identities?.length === 0) {
-      setError('An account with this email already exists.');
-    } else {
-      setMessage('Check your email to confirm your account.');
-    }
-    setLoading(false);
+
+    // Simulate account creation
+    setTimeout(() => {
+      setMessage('Account created successfully! Redirecting to dashboard...');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
+      setLoading(false);
+    }, 500);
+  };
+
+  const handleGoogleSignup = () => {
+    console.log('Google signup clicked');
+    // In a real app, this would trigger OAuth flow
+    navigate('/dashboard');
   };
 
   return (
     <div className="size-full min-h-screen relative overflow-hidden bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
       {/* Minecraft sky background */}
       <div className="absolute inset-0 opacity-30">
-        <div className="absolute inset-0" 
+        <div className="absolute inset-0"
           style={{
             backgroundImage: `url('https://minecraft.wiki/images/thumb/Plains_sky.png/1200px-Plains_sky.png')`,
             backgroundSize: 'cover',
@@ -72,21 +71,21 @@ export function Signup() {
           {/* Signup card with West African pattern border */}
           <div className="relative">
             {/* Main signup container */}
-            <div 
+            <div
               className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-5"
               style={{ imageRendering: 'pixelated' }}
             >
               {/* Logo area */}
               <div className="text-center mb-3">
                 <div className="flex items-center justify-center gap-3 mb-1.5">
-                  <img 
+                  <img
                     src = "/mindCraft_logo_border.png"
-                    alt="MindCraft Logo" 
+                    alt="MindCraft Logo"
                     className="w-14 h-14"
                   />
                 </div>
-                
-                <h1 
+
+                <h1
                   className="text-3xl mb-1 text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
                   style={{
                     fontFamily: 'monospace',
@@ -96,7 +95,7 @@ export function Signup() {
                 >
                   CREATE ACCOUNT
                 </h1>
-                
+
                 <p className="text-[#FCD34D] font-mono text-xs drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
                   Start Building Your Knowledge Today
                 </p>
@@ -166,8 +165,8 @@ export function Signup() {
                 </div>
 
                 <div>
-                  <label 
-                    htmlFor="password" 
+                  <label
+                    htmlFor="password"
                     className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     PASSWORD
@@ -184,8 +183,8 @@ export function Signup() {
                 </div>
 
                 <div>
-                  <label 
-                    htmlFor="confirmPassword" 
+                  <label
+                    htmlFor="confirmPassword"
                     className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     CONFIRM PASSWORD
@@ -203,8 +202,8 @@ export function Signup() {
 
                 {/* Terms and conditions */}
                 <div className="flex items-start gap-2 text-xs pt-1">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     id="terms"
                     required
                     className="w-4 h-4 border-2 border-black mt-0.5"
@@ -226,7 +225,7 @@ export function Signup() {
                         <div className="space-y-3 text-xs text-white/90 leading-relaxed">
                           <p><strong>Last updated: March 2026</strong></p>
                           <p>Enter boring stuff here before the deadline</p>
-                        
+
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -246,7 +245,7 @@ export function Signup() {
                         <div className="space-y-3 text-xs text-white/90 leading-relaxed">
                           <p><strong>Last updated: March 2026</strong></p>
                           <p>We're not going to sell your stuff</p>
-                          
+
                         </div>
                       </DialogContent>
                     </Dialog>
@@ -279,10 +278,7 @@ export function Signup() {
               {/* Google signup button */}
               <button
                 type="button"
-                onClick={() => supabase.auth.signInWithOAuth({
-                  provider: 'google',
-                  options: { redirectTo: 'http://localhost:5173/auth/callback' },
-                })}
+                onClick={handleGoogleSignup}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:translate-x-[2px] active:translate-y-[2px] transition-all hover:bg-gray-50"
                 style={{ imageRendering: 'pixelated', fontFamily: 'monospace' }}
               >
@@ -314,11 +310,11 @@ export function Signup() {
               <div className="mt-3 text-center">
                 <p className="text-white font-mono text-xs">
                   Already have an account?{' '}
-                  <Link 
-                    to="/" 
-                    className="text-[#FCD34D] hover:text-[#FBBF24] underline font-bold"
+                  <Link
+                    to="/login"
+                    className="text-[#FCD34D] hover:text-[#FDE047] underline"
                   >
-                    Login
+                    Login here
                   </Link>
                 </p>
               </div>

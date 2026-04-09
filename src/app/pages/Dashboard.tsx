@@ -3,64 +3,36 @@ import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, Clock, CheckCircle, Lock } from 'lucide-react';
-import { supabase } from '../lib/supabase/client';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
 const lessons = [
   {
     id: 1,
-    module: 'Vocabulary',
-    title: 'Everyday Words',
-    description: 'Build your core vocabulary with the most common words used in daily conversation.',
-    status: 'completed' as LessonStatus,
-    progress: 100,
+    module: 'Module 1',
+    title: 'Lesson 1',
+    description: '',
+    status: 'in-progress' as LessonStatus,
+    progress: 0,
     xp: 150,
   },
   {
     id: 2,
-    module: 'Vocabulary',
-    title: 'Idioms & Expressions',
-    description: 'Master common idioms and phrases that native speakers use all the time.',
-    status: 'completed' as LessonStatus,
-    progress: 100,
+    module: 'Module 2',
+    title: 'Lesson 2',
+    description: '',
+    status: 'in-progress' as LessonStatus,
+    progress: 0,
     xp: 200,
   },
   {
     id: 3,
-    module: 'Grammar',
-    title: 'Nouns & Pronouns',
-    description: 'Understand how to use nouns and pronouns correctly in sentences.',
+    module: 'Module 3',
+    title: 'Lesson 3',
+    description: '',
     status: 'in-progress' as LessonStatus,
-    progress: 45,
+    progress: 0,
     xp: 250,
-  },
-  {
-    id: 4,
-    module: 'Grammar',
-    title: 'Verb Tenses',
-    description: 'Learn past, present, and future tenses to talk about any point in time.',
-    status: 'locked' as LessonStatus,
-    progress: 0,
-    xp: 300,
-  },
-  {
-    id: 5,
-    module: 'Reading',
-    title: 'Reading Comprehension',
-    description: 'Practice understanding written passages and answering questions about them.',
-    status: 'locked' as LessonStatus,
-    progress: 0,
-    xp: 350,
-  },
-  {
-    id: 6,
-    module: 'Writing',
-    title: 'Sentence Structure',
-    description: 'Construct clear, well-formed sentences using proper syntax and punctuation.',
-    status: 'locked' as LessonStatus,
-    progress: 0,
-    xp: 400,
   },
 ];
 
@@ -96,15 +68,11 @@ export function Dashboard() {
   const [firstName, setFirstName] = useState('');
   const [role, setRole] = useState('');
 
+  // Mock user data - in a real app this would come from authentication
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
-      const meta = user.user_metadata;
-      // Google stores name as full_name; manual signup stores it the same way
-      const fullName: string = meta?.full_name ?? meta?.name ?? '';
-      setFirstName(fullName.split(' ')[0]);
-      setRole(meta?.role ?? '');
-    });
+    // Simulate fetching user data
+    setFirstName('Student');
+    setRole('');
   }, []);
 
   const handleLogout = () => {
@@ -115,7 +83,7 @@ export function Dashboard() {
   const totalXp = lessons.filter(l => l.status === 'completed').reduce((sum, l) => sum + l.xp, 0);
 
   return (
-    <div className="size-full min-h-screen relative overflow-hidden bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+    <div className="min-h-screen relative bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
       {/* Minecraft sky background */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0"
@@ -265,6 +233,7 @@ export function Dashboard() {
                       </span>
                       <button
                         disabled={lesson.status === 'locked'}
+                        onClick={() => lesson.status !== 'locked' && navigate(`/lesson/${lesson.id}`)}
                         className={`font-mono text-xs px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all disabled:cursor-not-allowed ${
                           lesson.status === 'completed'
                             ? 'bg-[#55942c] text-white hover:brightness-110'
