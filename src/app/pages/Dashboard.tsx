@@ -4,6 +4,7 @@ import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2 } from 'lucide-react';
 import { lessons } from '../../data/lessons';
+import { supabase } from '../lib/supabase/client';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
