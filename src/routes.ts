@@ -4,6 +4,8 @@ import { Signup } from './app/pages/Signup';
 import { Dashboard } from './app/pages/Dashboard';
 import { AuthCallback } from './app/auth/callback/page';
 import { SelectRole } from './app/pages/SelectRole';
+import { LessonPage } from './app/pages/LessonPage';
+import { TeacherLessonView } from './app/pages/TeacherLessonView';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +19,14 @@ export const router = createBrowserRouter([
   {
     path: '/dashboard',
     Component: Dashboard,
+  },
+  {
+    path: '/lesson/:id',
+    Component: LessonPage,
+  },
+  {
+    path: '/teacher/lesson/:id',
+    Component: TeacherLessonView,
   },
   {
     path: '/auth/callback',
