@@ -237,14 +237,35 @@ function StudentDashboard({
   firstName, role, onLogout,
 }: { firstName: string; role: string; onLogout: () => void }) {
   const navigate = useNavigate();
+  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const [totalXp, setTotalXp] = useState(0);
 
-  const completedCount = lessons.filter(l => l.status === 'completed').length;
-  const totalXp = lessons.filter(l => l.status === 'completed').reduce((sum, l) => sum + l.xp, 0);
+  useEffect(() => {
+    async function fetchProgress() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from('lesson_attempts')
+        .select('lesson_id, xp_earned')
+        .eq('user_id', user.id);
+      if (data) {
+        setCompletedIds(new Set(data.map(a => a.lesson_id as string)));
+        setTotalXp(data.reduce((sum, a) => sum + (a.xp_earned as number), 0));
+      }
+    }
+    fetchProgress();
+  }, []);
 
+  const completedCount = completedIds.size;
   const modules = Array.from(new Set(lessons.map(l => l.module)));
 
+  function getStatus(lesson: typeof lessons[0]): LessonStatus {
+    if (completedIds.has(lesson.id)) return 'completed';
+    return lesson.status;
+  }
+
   function handleLessonClick(lesson: typeof lessons[0]) {
-    if (lesson.status === 'locked') return;
+    if (getStatus(lesson) === 'locked') return;
     navigate(`/lesson/${lesson.id}`);
   }
 
@@ -340,15 +361,16 @@ function StudentDashboard({
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                   {moduleLessons.map(lesson => {
-                    const cfg = statusConfig[lesson.status];
+                    const status = getStatus(lesson);
+                    const cfg = statusConfig[status];
                     const Icon = cfg.icon;
-                    const progress = progressByStatus[lesson.status];
+                    const progress = progressByStatus[status];
                     return (
                       <div
                         key={lesson.id}
                         onClick={() => handleLessonClick(lesson)}
                         className={`bg-[#3C3C3C] border-4 ${cfg.border} shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 ${
-                          lesson.status === 'locked' ? 'opacity-60' : 'cursor-pointer hover:brightness-110 transition-all'
+                          status === 'locked' ? 'opacity-60' : 'cursor-pointer hover:brightness-110 transition-all'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -383,17 +405,17 @@ function StudentDashboard({
                             +{lesson.xp} XP
                           </span>
                           <button
-                            disabled={lesson.status === 'locked'}
+                            disabled={status === 'locked'}
                             onClick={e => { e.stopPropagation(); handleLessonClick(lesson); }}
                             className={`font-mono text-xs px-3 py-1.5 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all disabled:cursor-not-allowed ${
-                              lesson.status === 'completed'
+                              status === 'completed'
                                 ? 'bg-[#55942c] text-white hover:brightness-110'
-                                : lesson.status === 'in-progress'
+                                : status === 'in-progress'
                                 ? 'bg-[#FCD34D] text-black hover:brightness-110'
                                 : 'bg-white/10 text-white/30'
                             }`}
                           >
-                            {lesson.status === 'completed' ? 'REVIEW' : lesson.status === 'in-progress' ? 'START' : 'LOCKED'}
+                            {status === 'completed' ? 'REVIEW' : status === 'in-progress' ? 'START' : 'LOCKED'}
                           </button>
                         </div>
                       </div>
