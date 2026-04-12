@@ -4,6 +4,7 @@ import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
 import { ArrowLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
+import { Home } from 'lucide-react';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -65,6 +66,16 @@ export function Signup() {
         />
       </div>
 
+      {/* Back to Home Button */}
+      <div className="absolute top-4 right-4 z-20">
+        <MinecraftButton onClick={() => navigate('/')}>
+          <div className="flex items-center gap-2">
+            <Home size={16} />
+            HOME
+          </div>
+        </MinecraftButton>
+      </div>
+
       {/* Main content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4 py-8">
         <div className="w-full max-w-md">
@@ -72,7 +83,7 @@ export function Signup() {
           <div className="relative">
             {/* Main signup container */}
             <div
-              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-5"
+              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-4"
               style={{ imageRendering: 'pixelated' }}
             >
               {/* Logo area */}
@@ -96,7 +107,7 @@ export function Signup() {
                   CREATE ACCOUNT
                 </h1>
 
-                <p className="text-[#FCD34D] font-mono text-xs drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                <p className="text-white/90 font-mono text-xs drop-shadow-[2px_2px_1px_rgba(0,0,0,0.5)]">
                   Start Building Your Knowledge Today
                 </p>
 
@@ -111,7 +122,7 @@ export function Signup() {
               {/* Signup form */}
               <form onSubmit={handleSubmit} className="space-y-2">
                 {/* Role selector */}
-                <div className="flex border-4 border-black overflow-hidden mb-1">
+                <div className="flex border-4 border-black overflow-hidden mb-2.5">
                   {(['student', 'teacher'] as const).map((r) => (
                     <button
                       key={r}
@@ -131,7 +142,7 @@ export function Signup() {
                 <div>
                   <label
                     htmlFor="fullName"
-                    className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                    className="block mb-1 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     FULL NAME
                   </label>
@@ -149,7 +160,7 @@ export function Signup() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                    className="block mb-1 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     EMAIL
                   </label>
@@ -167,7 +178,7 @@ export function Signup() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                    className="block mb-1 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     PASSWORD
                   </label>
@@ -185,7 +196,7 @@ export function Signup() {
                 <div>
                   <label
                     htmlFor="confirmPassword"
-                    className="block mb-1.5 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                    className="block mb-1 text-white font-mono text-sm drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                   >
                     CONFIRM PASSWORD
                   </label>
@@ -212,11 +223,11 @@ export function Signup() {
                     I agree to the{' '}
                     <Dialog>
                       <DialogTrigger asChild>
-                        <button type="button" className="text-[#FCD34D] underline hover:text-[#FBBF24]">
+                        <button type="button" className="text-[#7BD640] underline hover:text-[#28D411]">
                           Terms of Service
                         </button>
                       </DialogTrigger>
-                      <DialogContent className="max-h-[70vh] overflow-y-auto bg-[#976d4c] border-4 border-black text-white font-mono">
+                      <DialogContent className="max-h-[70vh] overflow-y-auto bg-[#55942c] border-4 border-black text-white font-mono">
                         <DialogHeader>
                           <DialogTitle className="text-white font-mono text-lg drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]">
                             TERMS OF SERVICE
@@ -232,7 +243,7 @@ export function Signup() {
                     {' '}and{' '}
                     <Dialog>
                       <DialogTrigger asChild>
-                        <button type="button" className="text-[#FCD34D] underline hover:text-[#FBBF24]">
+                        <button type="button" className="text-[#7BD640] underline hover:text-[#28D411]">
                           Privacy Policy
                         </button>
                       </DialogTrigger>
@@ -312,7 +323,7 @@ export function Signup() {
                   Already have an account?{' '}
                   <Link
                     to="/login"
-                    className="text-[#FCD34D] hover:text-[#FDE047] underline"
+                    className="text-[#7BD640] hover:text-[#28D411] underline"
                   >
                     Login here
                   </Link>

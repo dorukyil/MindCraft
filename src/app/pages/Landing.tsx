@@ -37,16 +37,17 @@ export function Landing() {
             <ImageWithFallback
               src="/mindCraft_logo_border.png"
               alt="MindCraft Logo"
-              className="w-16 h-16"
+              className="w-18 h-18"
             />
             <div>
               <h1
-                className="text-4xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+                className="text-5xl text-white drop-shadow-[4px_4px_1px_rgba(0,0,0,0.8)]"
                 style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
               >
                 MINDCRAFT
               </h1>
-              <p className="text-white/80 font-mono text-sm mt-1">Build Your Knowledge, Block by Block</p>
+              <p className="text-white/80 font-mono text-sm mt-1 drop-shadow-[2px_2px_2px_rgba(0,0,0,1)]">
+                Build Your Knowledge, Block by Block</p>
             </div>
           </div>
           <MinecraftButton onClick={() => navigate('/login')}>
@@ -64,21 +65,21 @@ export function Landing() {
               >
                 LEARN THROUGH PLAY
               </h2>
-              <p className="text-white/90 font-mono text-lg mb-8 leading-relaxed">
+              <p className="text-white/90 font-mono text-lg mb-8 leading-relaxed drop-shadow-[2px_2px_2px_rgba(0,0,0,0.8)]">
                 MindCraft transforms education into an adventure where every lesson is a new block
                 in building your future.
               </p>
               <div className="flex gap-4">
-                <MinecraftButton onClick={() => navigate('/login')}>
-                  <div className="flex items-center gap-2">
+                <MinecraftButton onClick={() => navigate('/signup')} className="!bg-[#72b149]">
+                  <div className="flex items-center gap-3">
                     <BookOpen size={18} />
                     START LEARNING
                   </div>
                 </MinecraftButton>
-                <MinecraftButton onClick={() => navigate('/signup')} className="!bg-[#72b149]">
-                  <div className="flex items-center gap-2">
+                <MinecraftButton onClick={() => navigate('/login')}>
+                  <div className="flex items-center gap-3">
                     <Pickaxe size={18} />
-                    SIGN UP
+                    LOG IN
                   </div>
                 </MinecraftButton>
               </div>
@@ -146,15 +147,15 @@ export function Landing() {
               </div>
             </div>
 
-            <p className="text-white/90 font-mono text-lg text-center max-w-3xl mx-auto leading-relaxed">
-              Our mission is to make learning accessible,
-              culturally relevant, and incredibly fun for students of all ages.
+            <p className="text-lg text-white/90 font-mono text-lg text-center max-w-2xl mx-auto leading-relaxed drop-shadow-[3px_3px_0px_rgba(0,0,0,0.8)]"
+               style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>
+              Our mission is to make learning accessible, culturally relevant, and incredibly fun for students of all ages.
             </p>
           </div>
         </section>
 
         {/* Gallery Section */}
-        <section className="px-8 py-16 max-w-7xl mx-auto">
+        <section className="px-4 py-16 max-w-7xl mx-auto">
           <h3
             className="text-4xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] mb-8 text-center"
             style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
@@ -165,22 +166,22 @@ export function Landing() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* Gallery Image 1 */}
             <div
-              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] overflow-hidden"
+              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] overflow-hidden"
               style={{ imageRendering: 'pixelated' }}
             >
               <ImageWithFallback
                 src="/students with tech.jpeg"
                 alt="Education and books"
-                className="w-full h-[300px] object-cover"
+                className="w-full h-[300px] object-cover block"
               />
-              <div className="p-4 bg-[#3C3C3C] border-t-4 border-black">
-                <p className="text-white font-mono text-sm">Traditional learning meets modern technology</p>
+              <div className="p-5 bg-[#3C3C3C] border-t-4 border-black">
+                <p className="text-white font-mono text-sm text-center">Traditional learning meets modern technology</p>
               </div>
             </div>
 
             {/* Gallery Image 2 */}
             <div
-              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] overflow-hidden"
+              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] overflow-hidden"
               style={{ imageRendering: 'pixelated' }}
             >
               <ImageWithFallback
@@ -188,8 +189,8 @@ export function Landing() {
                 alt="Building blocks"
                 className="w-full h-[300px] object-cover"
               />
-              <div className="p-4 bg-[#3C3C3C] border-t-4 border-black">
-                <p className="text-white font-mono text-sm">Build your knowledge, one block at a time</p>
+              <div className="p-5 bg-[#3C3C3C] border-t-4 border-black">
+                <p className="text-white font-mono text-sm text-center">Build your knowledge, one block at a time</p>
               </div>
             </div>
           </div>
@@ -204,7 +205,7 @@ export function Landing() {
             >
               READY TO START BUILDING?
             </h3>
-            <p className="text-white/90 font-mono text-lg mb-8">
+            <p className="text-white/90 font-mono text-lg mb-5 drop-shadow-[2px_2px_1px_rgba(0,0,0,0.8)]">
               Join MindCraft today and transform the way you learn!
             </p>
             <div className="flex gap-4 justify-center">
@@ -214,7 +215,7 @@ export function Landing() {
                   LOGIN
                 </div>
               </MinecraftButton>
-              <MinecraftButton onClick={() => navigate('/signup')} className="!bg-[#FCD34D] !text-black">
+              <MinecraftButton onClick={() => navigate('/signup')} className="!bg-[#FCD34D] !text-white">
                 <div className="flex items-center gap-2">
                   <Pickaxe size={18} />
                   CREATE ACCOUNT
@@ -225,10 +226,10 @@ export function Landing() {
         </section>
 
         {/* Footer */}
-        <footer className="px-8 py-6 bg-[#3C3C3C] border-t-4 border-black">
+        <footer className="px-8 py-3 bg-[#3C3C3C] border-black">
           <div className="max-w-7xl mx-auto text-center">
-            <p className="text-white/60 font-mono text-sm">
-              © 2026 MindCraft. Build Your Knowledge, Block by Block.
+            <p className="text-white/50 font-mono text-sm">
+              © 2026 MindCraft: Build Your Knowledge, Block by Block.
             </p>
           </div>
         </footer>

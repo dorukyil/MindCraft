@@ -90,7 +90,7 @@ export function Login() {
                   MINDCRAFT
                 </h1>
 
-                <p className="text-[#FCD34D] font-mono text-xs drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                <p className="text-[#7BD640] font-mono text-xs drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
                   Build Your Knowledge, Block by Block
                 </p>
 
@@ -149,7 +149,7 @@ export function Login() {
                   </label>
                   <a
                     href="#"
-                    className="text-[#FCD34D] font-mono hover:text-[#FBBF24] underline"
+                    className="text-[#7BD640] font-mono hover:text-[#28D411] underline"
                   >
                     Forgot password?
                   </a>
@@ -210,7 +210,7 @@ export function Login() {
                   New to MindCraft?{' '}
                   <Link
                     to="/signup"
-                    className="text-[#FCD34D] hover:text-[#FBBF24] underline font-bold"
+                    className="text-[#7BD640] hover:text-[#28D411] underline font-bold"
                   >
                     Create Account
                   </Link>
