@@ -455,6 +455,7 @@ export function Dashboard() {
       setRole(meta?.role ?? '');
       setRoleLoaded(true);
     });
+    setRoleLoaded(true); // Can remove this later, just had to do this to get it working again for me
   }, []);
 
   const handleLogout = () => navigate('/');
