@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { MinecraftInput } from '../components/MinecraftInput';
 import { Home } from 'lucide-react';
+import { supabase } from '../lib/supabase/client';
 
 export function Login() {
   const navigate = useNavigate();
@@ -29,10 +30,20 @@ export function Login() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    console.log('Google login clicked');
-    // In a real app, this would trigger OAuth flow
-    navigate('/dashboard');
+  const handleGoogleLogin = async () => {
+    setError(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+    // On success, Supabase redirects the browser — no navigate() needed
   };
 
   return (

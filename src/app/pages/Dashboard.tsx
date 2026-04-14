@@ -445,7 +445,10 @@ export function Dashboard() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) return;
+      if (!user) {
+        navigate('/login');
+        return;
+      }
       const meta = user.user_metadata;
       const fullName: string = meta?.full_name ?? meta?.name ?? '';
       setFirstName(fullName.split(' ')[0]);
