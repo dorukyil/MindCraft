@@ -261,7 +261,11 @@ function StudentDashboard({
 
   function getStatus(lesson: typeof lessons[0]): LessonStatus {
     if (completedIds.has(lesson.id)) return 'completed';
-    return lesson.status;
+    const moduleLessons = lessons.filter(l => l.module === lesson.module);
+    const idx = moduleLessons.findIndex(l => l.id === lesson.id);
+    if (idx === 0) return 'in-progress';
+    const prev = moduleLessons[idx - 1];
+    return completedIds.has(prev.id) ? 'in-progress' : 'locked';
   }
 
   function handleLessonClick(lesson: typeof lessons[0]) {
