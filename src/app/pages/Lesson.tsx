@@ -10,7 +10,7 @@ const lessonsData = [
   {
     id: 1,
     module: 'Module 1',
-    title: 'Lesson 1',
+    title: 'WASSCE (West African Senior School Certificate)',
     description: '',
     status: 'in-progress' as LessonStatus,
     progress: 0,
@@ -19,7 +19,7 @@ const lessonsData = [
   {
     id: 2,
     module: 'Module 2',
-    title: 'Lesson 2',
+    title: 'BECE (Basic Education Certificate Examination)',
     description: '',
     status: 'in-progress' as LessonStatus,
     progress: 0,

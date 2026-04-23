@@ -5,118 +5,205 @@ import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2 } from 'lucide-react';
 import { lessons } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
+import { Sidebar } from '../components/Sidebar';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
 const statusConfig: Record<LessonStatus, {
+
   label: string;
+
   labelColor: string;
+
   border: string;
+
   icon: typeof CheckCircle;
+
   iconColor: string;
+
   barColor: string;
+
 }> = {
+
   completed: {
+
     label: 'COMPLETED',
+
     labelColor: 'text-[#72b149]',
+
     border: 'border-[#72b149]',
+
     icon: CheckCircle,
+
     iconColor: 'text-[#72b149]',
+
     barColor: 'bg-[#72b149]',
+
   },
+
   'in-progress': {
+
     label: 'IN PROGRESS',
+
     labelColor: 'text-[#FCD34D]',
+
     border: 'border-[#FCD34D]',
+
     icon: Clock,
+
     iconColor: 'text-[#FCD34D]',
+
     barColor: 'bg-[#FCD34D]',
+
   },
+
   locked: {
+
     label: 'LOCKED',
+
     labelColor: 'text-white/40',
+
     border: 'border-white/20',
+
     icon: Lock,
+
     iconColor: 'text-white/40',
+
     barColor: 'bg-white/20',
+
   },
+
 };
 
 const progressByStatus: Record<LessonStatus, number> = {
+
   completed: 100,
+
   'in-progress': 0,
+
   locked: 0,
+
 };
 
 // ─── Teacher Dashboard ────────────────────────────────────────────────────────
+
 function TeacherDashboard({
+
   firstName, onLogout,
+
 }: { firstName: string; onLogout: () => void }) {
+
   const navigate = useNavigate();
+
   const [completionCounts, setCompletionCounts] = useState<Record<string, number>>({});
+
   const [avgScores, setAvgScores] = useState<Record<string, number>>({});
+
   const [loading, setLoading] = useState(true);
 
-  // Mock user data - in a real app this would come from authentication
   useEffect(() => {
+
     async function fetchStats() {
+
       const { data } = await supabase
+
         .from('lesson_attempts')
+
         .select('lesson_id, correct_count, total_questions');
 
       if (data) {
+
         const counts: Record<string, number> = {};
+
         const totals: Record<string, { correct: number; questions: number }> = {};
 
         for (const row of data) {
+
           counts[row.lesson_id] = (counts[row.lesson_id] ?? 0) + 1;
+
           if (!totals[row.lesson_id]) totals[row.lesson_id] = { correct: 0, questions: 0 };
+
           totals[row.lesson_id].correct += row.correct_count;
+
           totals[row.lesson_id].questions += row.total_questions;
+
         }
 
         const avgs: Record<string, number> = {};
+
         for (const [lid, t] of Object.entries(totals)) {
+
           avgs[lid] = t.questions > 0 ? Math.round((t.correct / t.questions) * 100) : 100;
+
         }
 
         setCompletionCounts(counts);
+
         setAvgScores(avgs);
+
       }
+
       setLoading(false);
+
     }
+
     fetchStats();
+
   }, []);
 
   const modules = Array.from(new Set(lessons.map(l => l.module)));
+
   const totalCompletions = Object.values(completionCounts).reduce((s, v) => s + v, 0);
 
   return (
+
     <div className="size-full min-h-screen relative overflow-hidden bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+
       <div className="absolute inset-0 opacity-30">
+
         <div className="absolute inset-0"
+
           style={{
+
             backgroundImage: `url('https://minecraft.wiki/images/thumb/Plains_sky.png/1200px-Plains_sky.png')`,
+
             backgroundSize: 'cover', backgroundPosition: 'center', imageRendering: 'pixelated',
+
           }}
+
         />
+
       </div>
 
       <div className="relative z-10 min-h-screen p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-12 h-12" />
-            <h1
-              className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
-              style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
-            >
-              MINDCRAFT
-            </h1>
-          </div>
-          <MinecraftButton onClick={onLogout}>LOGOUT</MinecraftButton>
-        </div>
 
+        {/* Sidebar */}
+
+        <Sidebar onLogout={onLogout} />
+
+        {/* Header */}
+
+        <div className="flex items-center mb-8">
+
+          <div className="flex items-center gap-4">
+
+            <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-12 h-12" />
+
+            <h1
+
+              className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+
+              style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
+
+            >
+
+              MINDCRAFT
+
+            </h1>
+
+          </div>
+
+        </div>
         <div className="max-w-6xl mx-auto">
           {/* Welcome bar */}
           <div
@@ -297,7 +384,7 @@ function StudentDashboard({
               MINDCRAFT
             </h1>
           </div>
-          <MinecraftButton onClick={onLogout}>LOGOUT</MinecraftButton>
+          <Sidebar onLogout={onLogout} />
         </div>
 
         <div className="max-w-6xl mx-auto">

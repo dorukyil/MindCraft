@@ -7,6 +7,8 @@ import { SelectRole } from './app/pages/SelectRole';
 import { Landing } from './app/pages/Landing';
 import { LessonPage } from './app/pages/LessonPage';
 import { TeacherLessonView } from './app/pages/TeacherLessonView';
+import { Profile } from './app/pages/Profile';
+import { Subscriptions } from './app/pages/Subscriptions';
 
 export const router = createBrowserRouter([
   {
@@ -40,5 +42,13 @@ export const router = createBrowserRouter([
   {
     path: '/select-role',
     Component: SelectRole,
+  },
+  {
+    path: '/profile',
+    Component: Profile,
+  },
+  {
+    path: '/subscriptions',
+    Component: Subscriptions,
   },
 ]);
