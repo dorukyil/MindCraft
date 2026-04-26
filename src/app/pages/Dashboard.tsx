@@ -177,44 +177,41 @@ function TeacherDashboard({
 
       <div className="relative z-10 min-h-screen p-8">
 
-        {/* Sidebar */}
-
+        {/* Sidebar — self-contained with fixed positioning */}
         <Sidebar onLogout={onLogout} />
 
-        {/* Header */}
-
-        <div className="flex items-center mb-8">
-
+        {/* Header — centered */}
+        <div className="flex justify-center mb-8">
           <div className="flex items-center gap-4">
-
-            <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-12 h-12" />
-
+            <ImageWithFallback
+              src="/mindCraft_logo_border.png"
+              alt="MindCraft Logo"
+              className="w-12 h-12"
+            />
             <h1
-
-              className="text-3xl text-white drop-shadow-[4px_4px_1px_rgba(0,0,0,0.8)]"
-
-              style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
-
+              className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+              style={{
+                fontFamily: 'monospace',
+                imageRendering: 'pixelated',
+                letterSpacing: '2px',
+              }}
             >
-
               MINDCRAFT
-
             </h1>
-
           </div>
-
         </div>
+
         <div className="max-w-6xl mx-auto">
           {/* Welcome bar */}
           <div
-            className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
-            style={{ imageRendering: 'pixelated' }}
+              className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
+              style={{imageRendering: 'pixelated'}}
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h2
-                  className="text-2xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
-                  style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
+                    className="text-2xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+                    style={{fontFamily: 'monospace', letterSpacing: '2px'}}
                 >
                   TEACHER DASHBOARD{firstName ? ` — ${firstName.toUpperCase()}` : ''}
                 </h2>
@@ -223,11 +220,13 @@ function TeacherDashboard({
                 </p>
               </div>
               <div className="flex gap-4">
-                <div className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
+                <div
+                    className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
                   <p className="text-[#83aeff] font-mono text-xl font-bold">{lessons.length}</p>
                   <p className="text-white/60 font-mono text-xs">LESSONS</p>
                 </div>
-                <div className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
+                <div
+                    className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
                   <p className="text-[#FCD34D] font-mono text-xl font-bold">
                     {loading ? '…' : totalCompletions}
                   </p>
@@ -241,76 +240,76 @@ function TeacherDashboard({
           {modules.map(module => {
             const moduleLessons = lessons.filter(l => l.module === module);
             return (
-              <div
-                key={module}
-                className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
-                style={{ imageRendering: 'pixelated' }}
-              >
-                <h3
-                  className="text-lg text-white mb-4 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
-                  style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
+                <div
+                    key={module}
+                    className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
+                    style={{imageRendering: 'pixelated'}}
                 >
-                  {module} LESSONS
-                </h3>
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#72b149] to-transparent" />
-                  <div className="w-2 h-2 bg-[#72b149] rotate-45" />
-                  <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#72b149] to-transparent" />
-                </div>
+                  <h3
+                      className="text-lg text-white mb-4 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+                      style={{fontFamily: 'monospace', letterSpacing: '2px'}}
+                  >
+                    {module} LESSONS
+                  </h3>
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#72b149] to-transparent"/>
+                    <div className="w-2 h-2 bg-[#72b149] rotate-45"/>
+                    <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#72b149] to-transparent"/>
+                  </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {moduleLessons.map(lesson => {
-                    const count = completionCounts[lesson.id] ?? 0;
-                    const avg = avgScores[lesson.id];
-                    const avgColor = avg === undefined ? 'text-white/40' : avg >= 80 ? 'text-[#72b149]' : avg >= 50 ? 'text-[#FCD34D]' : 'text-red-400';
-                    return (
-                      <div
-                        key={lesson.id}
-                        onClick={() => navigate(`/teacher/lesson/${lesson.id}`)}
-                        className="bg-[#3C3C3C] border-4 border-[#83aeff]/60 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 cursor-pointer hover:brightness-110 transition-all"
-                      >
-                        {/* Module tag + analytics icon */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-white/50 font-mono text-xs">{lesson.module}</span>
-                          <BarChart2 size={14} className="text-[#83aeff]" />
-                        </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {moduleLessons.map(lesson => {
+                      const count = completionCounts[lesson.id] ?? 0;
+                      const avg = avgScores[lesson.id];
+                      const avgColor = avg === undefined ? 'text-white/40' : avg >= 80 ? 'text-[#72b149]' : avg >= 50 ? 'text-[#FCD34D]' : 'text-red-400';
+                      return (
+                          <div
+                              key={lesson.id}
+                              onClick={() => navigate(`/teacher/lesson/${lesson.id}`)}
+                              className="bg-[#3C3C3C] border-4 border-[#83aeff]/60 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] p-4 flex flex-col gap-3 cursor-pointer hover:brightness-110 transition-all"
+                          >
+                            {/* Module tag + analytics icon */}
+                            <div className="flex items-center justify-between">
+                              <span className="text-white/50 font-mono text-xs">{lesson.module}</span>
+                              <BarChart2 size={14} className="text-[#83aeff]"/>
+                            </div>
 
-                        {/* Title + description */}
-                        <div>
-                          <div className="flex items-start gap-2 mb-1">
-                            <BookOpen size={14} className="text-white/70 mt-0.5 shrink-0" />
-                            <h4 className="text-white font-mono text-sm font-bold drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)] leading-tight">
-                              {lesson.title}
-                            </h4>
-                          </div>
-                          <p className="text-white/60 font-mono text-xs leading-relaxed pl-5">
-                            {lesson.description}
-                          </p>
-                        </div>
+                            {/* Title + description */}
+                            <div>
+                              <div className="flex items-start gap-2 mb-1">
+                                <BookOpen size={14} className="text-white/70 mt-0.5 shrink-0"/>
+                                <h4 className="text-white font-mono text-sm font-bold drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)] leading-tight">
+                                  {lesson.title}
+                                </h4>
+                              </div>
+                              <p className="text-white/60 font-mono text-xs leading-relaxed pl-5">
+                                {lesson.description}
+                              </p>
+                            </div>
 
-                        {/* Stats row */}
-                        <div className="flex items-center justify-between mt-auto pt-2 border-t-2 border-black/30">
-                          <div className="flex items-center gap-1.5">
-                            <Users size={12} className="text-[#83aeff]" />
-                            <span className="text-[#83aeff] font-mono text-xs font-bold">
+                            {/* Stats row */}
+                            <div className="flex items-center justify-between mt-auto pt-2 border-t-2 border-black/30">
+                              <div className="flex items-center gap-1.5">
+                                <Users size={12} className="text-[#83aeff]"/>
+                                <span className="text-[#83aeff] font-mono text-xs font-bold">
                               {loading ? '…' : `${count} student${count !== 1 ? 's' : ''}`}
                             </span>
-                          </div>
-                          <span className={`font-mono text-xs font-bold ${avgColor}`}>
+                              </div>
+                              <span className={`font-mono text-xs font-bold ${avgColor}`}>
                             {loading ? '…' : avg !== undefined ? `avg ${avg}%` : 'no data'}
                           </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                            </div>
+                          </div>
+                      );
+                    })}
+                  </div>
 
-                <div className="mt-6 flex justify-center gap-2">
-                  <div className="w-3 h-3 bg-[#82c159] border-2 border-black" />
-                  <div className="w-3 h-3 bg-[#72b149] border-2 border-black" />
-                  <div className="w-3 h-3 bg-[#55942c] border-2 border-black" />
+                  <div className="mt-6 flex justify-center gap-2">
+                    <div className="w-3 h-3 bg-[#82c159] border-2 border-black"/>
+                    <div className="w-3 h-3 bg-[#72b149] border-2 border-black"/>
+                    <div className="w-3 h-3 bg-[#55942c] border-2 border-black"/>
+                  </div>
                 </div>
-              </div>
             );
           })}
         </div>
@@ -321,15 +320,15 @@ function TeacherDashboard({
 
 // ─── Student Dashboard ────────────────────────────────────────────────────────
 function StudentDashboard({
-  firstName, role, onLogout,
-}: { firstName: string; role: string; onLogout: () => void }) {
+                            firstName, role, onLogout,
+                          }: { firstName: string; role: string; onLogout: () => void }) {
   const navigate = useNavigate();
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [totalXp, setTotalXp] = useState(0);
 
   useEffect(() => {
     async function fetchProgress() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {data: {user}} = await supabase.auth.getUser();
       if (!user) return;
       const { data } = await supabase
         .from('lesson_attempts')
@@ -373,18 +372,20 @@ function StudentDashboard({
       </div>
 
       <div className="relative z-10 min-h-screen p-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        {/* Sidebar — self-contained with fixed positioning */}
+        <Sidebar onLogout={onLogout} />
+
+        {/* Header — centered */}
+        <div className="flex justify-center mb-8">
           <div className="flex items-center gap-4">
             <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-12 h-12" />
             <h1
-              className="text-3xl text-white drop-shadow-[4px_4px_1px_rgba(0,0,0,0.8)]"
+              className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
               style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
             >
               MINDCRAFT
             </h1>
           </div>
-          <Sidebar onLogout={onLogout} />
         </div>
 
         <div className="max-w-6xl mx-auto">
@@ -546,6 +547,7 @@ export function Dashboard() {
       setRole(meta?.role ?? '');
       setRoleLoaded(true);
     });
+    setRoleLoaded(true); // Can remove this later, just had to do this to get it working again for me
   }, []);
 
   const handleLogout = () => navigate('/');

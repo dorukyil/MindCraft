@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase/client';
-import { MinecraftButton } from '../components/MinecraftButton';
 
 export function Profile() {
   const [name, setName] = useState('');
@@ -31,22 +30,25 @@ export function Profile() {
   }, []);
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
-
-      {/* Minecraft Dashboard Button */}
-      <div className="absolute top-6 left-6">
-        <MinecraftButton onClick={() => navigate('/dashboard')}>
-          <div className="flex items-center gap-2">
-            <ArrowLeft size={16} />
-            DASHBOARD
-          </div>
-        </MinecraftButton>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#83aeff] to-[#8fb9ff] p-6">
+      {/* Back button — matches LessonPage exactly */}
+      <div className="flex items-center gap-4 mb-6">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2 text-white/70 hover:text-white font-mono text-xl transition-colors"
+        >
+          <ArrowLeft size={28} />
+          DASHBOARD
+        </button>
       </div>
 
-      <div className="bg-[#3C3C3C] border-4 border-black p-8 shadow-[6px_6px_0px_black] text-white font-mono">
-        <h1 className="text-xl mb-4">PROFILE</h1>
-        <p>Name: {name}</p>
-        <p>Total XP: {xp}</p>
+      {/* Page content */}
+      <div className="flex-1 flex items-center justify-center">
+        <div className="bg-[#3C3C3C] border-4 border-black p-8 shadow-[6px_6px_0px_black] text-white font-mono">
+          <h1 className="text-xl mb-4">PROFILE</h1>
+          <p>Name: {name}</p>
+          <p>Total XP: {xp}</p>
+        </div>
       </div>
     </div>
   );
