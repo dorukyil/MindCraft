@@ -5,6 +5,7 @@ import { lessons, LessonStep } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, AlertTriangle, Pencil, CheckCircle, XCircle, ArrowLeft, Star, Loader2 } from 'lucide-react';
+import { MinecraftButton } from '../components/MinecraftButton';
 
 const STEP_ICONS = {
   learn: <BookOpen size={22} className="text-[#72b149]" />,
@@ -313,13 +314,12 @@ export function LessonPage() {
       <div className="relative z-10 min-h-screen p-6 flex flex-col">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-white/70 hover:text-white font-mono text-xs transition-colors"
-          >
-            <ArrowLeft size={16} />
-            DASHBOARD
-          </button>
+          <MinecraftButton onClick={() => navigate('/dashboard')}>
+            <div className="flex items-center gap-2">
+              <ArrowLeft size={16} />
+              DASHBOARD
+            </div>
+          </MinecraftButton>
           <div className="flex items-center gap-3 ml-auto">
             <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-8 h-8" />
             <h1

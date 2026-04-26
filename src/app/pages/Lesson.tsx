@@ -91,7 +91,7 @@ export function Lesson() {
           <MinecraftButton onClick={() => navigate('/dashboard')}>
             <div className="flex items-center gap-2">
               <ArrowLeft size={16} />
-              BACK TO DASHBOARD
+              DASHBOARD
             </div>
           </MinecraftButton>
         </div>

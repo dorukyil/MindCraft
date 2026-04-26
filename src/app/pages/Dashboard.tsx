@@ -191,7 +191,7 @@ function TeacherDashboard({
 
             <h1
 
-              className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+              className="text-3xl text-white drop-shadow-[4px_4px_1px_rgba(0,0,0,0.8)]"
 
               style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
 
@@ -378,7 +378,7 @@ function StudentDashboard({
           <div className="flex items-center gap-4">
             <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-12 h-12" />
             <h1
-              className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+              className="text-3xl text-white drop-shadow-[4px_4px_1px_rgba(0,0,0,0.8)]"
               style={{ fontFamily: 'monospace', imageRendering: 'pixelated', letterSpacing: '2px' }}
             >
               MINDCRAFT
@@ -546,7 +546,6 @@ export function Dashboard() {
       setRole(meta?.role ?? '');
       setRoleLoaded(true);
     });
-    setRoleLoaded(true); // Can remove this later, just had to do this to get it working again for me
   }, []);
 
   const handleLogout = () => navigate('/');

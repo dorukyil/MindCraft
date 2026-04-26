@@ -1,12 +1,29 @@
+import { useNavigate } from 'react-router';
+import { ArrowLeft } from 'lucide-react';
+import { MinecraftButton } from '../components/MinecraftButton';
+
 export function Subscriptions() {
+  const navigate = useNavigate();
+
   const tiers = [
     { name: 'BASIC', color: 'bg-gray-600' },
-    { name: 'ADVANCED', color: 'bg-[#83aeff]' },
+    { name: 'ADVANCED', color: 'bg-[#5992FF]' },
     { name: 'MAX', color: 'bg-[#FCD34D]' },
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+
+      {/* Minecraft Dashboard Button */}
+      <div className="absolute top-6 left-6">
+        <MinecraftButton onClick={() => navigate('/dashboard')}>
+          <div className="flex items-center gap-2">
+            <ArrowLeft size={16} />
+            DASHBOARD
+          </div>
+        </MinecraftButton>
+      </div>
+
       <div className="flex gap-8">
         {tiers.map((tier) => (
           <div

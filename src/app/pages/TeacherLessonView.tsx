@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase/client';
 import { lessons } from '../../data/lessons';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { ArrowLeft, ChevronDown, ChevronRight, CheckCircle, XCircle, Users, Loader2 } from 'lucide-react';
+import { MinecraftButton } from '../components/MinecraftButton';
 
 interface Attempt {
   id: string;
@@ -113,22 +114,13 @@ export function TeacherLessonView() {
       <div className="relative z-10 min-h-screen p-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 text-white/70 hover:text-white font-mono text-xs transition-colors"
-          >
-            <ArrowLeft size={16} />
-            DASHBOARD
-          </button>
-          <div className="flex items-center gap-3 ml-auto">
-            <ImageWithFallback src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-8 h-8" />
-            <h1
-              className="text-xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
-              style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
-            >
-              MINDCRAFT
-            </h1>
-          </div>
+
+          <MinecraftButton onClick={() => navigate('/dashboard')}>
+            <div className="flex items-center gap-2">
+              <ArrowLeft size={16} />
+              DASHBOARD
+            </div>
+          </MinecraftButton>
         </div>
 
         <div className="max-w-4xl mx-auto flex flex-col gap-6">
