@@ -22,9 +22,13 @@ export function UploadAssignmentModal({ onClose, onCreated }: Props) {
     setSaving(true);
     setError('');
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError('Not signed in.'); setSaving(false); return; }
+
     const { data: assignment, error: insertError } = await supabase
       .from('assignments')
       .insert({
+        created_by: user.id,
         title: title.trim(),
         description: description.trim() || null,
         due_date: dueDate || null,

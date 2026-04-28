@@ -89,7 +89,11 @@ export function UploadLessonModal({ onClose, onUploaded }: Props) {
     if (!lesson) return;
     setStage('saving');
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setError('Not signed in.'); setStage('error'); return; }
+
     const { error: dbError } = await supabase.from('uploaded_lessons').insert({
+      created_by: user.id,
       lesson_data: lesson,
     });
 

@@ -23,7 +23,7 @@ create policy "read attempts"
   on lesson_attempts for select
   using (
     auth.uid() = user_id
-    or (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    or (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 -- ─── lesson_answers ──────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ create policy "read answers"
   on lesson_answers for select
   using (
     auth.uid() = user_id
-    or (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    or (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 -- ─── uploaded_lessons ────────────────────────────────────────────────────────
@@ -68,7 +68,7 @@ drop policy if exists "teachers insert lessons" on uploaded_lessons;
 create policy "teachers insert lessons"
   on uploaded_lessons for insert
   with check (
-    (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 drop policy if exists "all read lessons" on uploaded_lessons;
@@ -81,7 +81,7 @@ create policy "teachers delete own lessons"
   on uploaded_lessons for delete
   using (
     auth.uid() = created_by
-    and (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    and (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 -- ─── assignments ─────────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ drop policy if exists "teachers insert assignments" on assignments;
 create policy "teachers insert assignments"
   on assignments for insert
   with check (
-    (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 drop policy if exists "all read assignments" on assignments;
@@ -114,7 +114,7 @@ create policy "teachers update own assignments"
   on assignments for update
   using (
     auth.uid() = created_by
-    and (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    and (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 drop policy if exists "teachers delete own assignments" on assignments;
@@ -122,7 +122,7 @@ create policy "teachers delete own assignments"
   on assignments for delete
   using (
     auth.uid() = created_by
-    and (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    and (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 -- ─── assignment_submissions ───────────────────────────────────────────────────
@@ -153,7 +153,7 @@ create policy "read submissions"
   on assignment_submissions for select
   using (
     auth.uid() = user_id
-    or (select raw_user_meta_data->>'role' from auth.users where id = auth.uid()) = 'teacher'
+    or (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
 -- ─── Storage bucket: assignments ─────────────────────────────────────────────
