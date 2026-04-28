@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { ArrowLeft, Star, BookOpen, Target, ClipboardList, CheckCircle, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase/client';
 import { lessons } from '../../data/lessons';
+import { MinecraftButton } from '../components/MinecraftButton';
 
 interface Attempt {
   lesson_id: string;
@@ -112,15 +113,14 @@ export function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#83aeff] to-[#8fb9ff] p-6">
-      {/* Back */}
+      {/* Back to dashboard button */}
       <div className="flex items-center gap-4 mb-8">
-        <button
+        <MinecraftButton
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 text-white/70 hover:text-white font-mono text-xl transition-colors"
-        >
-          <ArrowLeft size={28} />
+          className="flex items-center gap-2 font-mono text-xl transition-colors">
+          <ArrowLeft size={16} />
           DASHBOARD
-        </button>
+        </MinecraftButton>
       </div>
 
       {loading ? (

@@ -38,7 +38,7 @@ export function MinecraftButton({
         fontFamily: 'monospace'
       }}
     >
-      <span className="drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+      <span className="drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)] inline-flex items-center gap-2">
         {children}
       </span>
     </button>

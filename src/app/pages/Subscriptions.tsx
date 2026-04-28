@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
+import { MinecraftButton } from '../components/MinecraftButton';
 
 export function Subscriptions() {
   const navigate = useNavigate();
@@ -12,15 +13,14 @@ export function Subscriptions() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#83aeff] to-[#8fb9ff] p-6">
-      {/* Back button — matches LessonPage exactly */}
-      <div className="flex items-center gap-4 mb-6">
-        <button
+      {/* Back to dashboard button */}
+      <div className="flex items-center gap-4 mb-8">
+        <MinecraftButton
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 text-white/70 hover:text-white font-mono text-xl transition-colors"
-        >
-          <ArrowLeft size={28} />
+          className="flex items-center gap-2 font-mono text-xl transition-colors">
+          <ArrowLeft size={16} />
           DASHBOARD
-        </button>
+        </MinecraftButton>
       </div>
 
       {/* Page content */}

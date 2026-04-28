@@ -45,6 +45,49 @@ function isOverdue(due: string) {
   return d < new Date();
 }
 
+function getGradeColor(grade: string | null): { color: string } {
+  if (!grade) return { color: '#FCD34D' };
+
+  const g = grade.trim().toUpperCase();
+
+  if (g === 'A+') return { color: '#46EB6A' };
+  if (g === 'A')  return { color: '#46EB56' };
+  if (g === 'A-') return { color: '#5AEB51' };
+
+  if (g === 'B+') return { color: '#6FEB4B' };
+  if (g === 'B')  return { color: '#83EB46' };
+  if (g === 'B-') return { color: '#A3EB46' };
+
+  if (g === 'C+') return { color: '#C4EB46' };
+  if (g === 'C')  return { color: '#E5EB46' };
+  if (g === 'C-') return { color: '#E7D646' };
+
+  if (g === 'D+') return { color: '#E9C146' };
+  if (g === 'D')  return { color: '#EBAC46' };
+  if (g === 'D-') return { color: '#E89046' };
+
+  if (g === 'F')  return { color: '#EB4646' };
+
+  const num = parseFloat(g.replace('%', ''));
+  if (!isNaN(num)) {
+    if (num >= 97) return { color: '#46EB6A' }; // A+
+    if (num >= 93) return { color: '#46EB56' }; // A
+    if (num >= 90) return { color: '#5AEB51' }; // A-
+    if (num >= 87) return { color: '#6FEB4B' }; // B+
+    if (num >= 83) return { color: '#83EB46' }; // B
+    if (num >= 80) return { color: '#A3EB46' }; // B-
+    if (num >= 77) return { color: '#C4EB46' }; // C+
+    if (num >= 73) return { color: '#E5EB46' }; // C
+    if (num >= 70) return { color: '#E7D646' }; // C-
+    if (num >= 67) return { color: '#E9C146' }; // D+
+    if (num >= 63) return { color: '#EBAC46' }; // D
+    if (num >= 60) return { color: '#E89046' }; // D-
+    return { color: '#EB4646' }; // F
+  }
+
+  return { color: '#CFCFCF' }; // Other input default
+}
+
 async function openSignedUrl(path: string) {
   const { data } = await supabase.storage
     .from('assignments')
@@ -320,7 +363,14 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
 
                                   {/* Grade badge if graded */}
                                   {sub.grade && (
-                                    <span className="bg-[#FCD34D]/20 border border-[#FCD34D]/60 text-[#FCD34D] font-mono text-xs px-2 py-0.5 shrink-0 font-bold">
+                                    <span
+                                      className="font-mono text-xs px-2 py-0.5 shrink-0 font-bold border"
+                                      style={{
+                                        color: getGradeColor(sub.grade).color,
+                                        borderColor: `${getGradeColor(sub.grade).color}99`,
+                                        backgroundColor: `${getGradeColor(sub.grade).color}33`,
+                                      }}
+                                    >
                                       {sub.grade}
                                     </span>
                                   )}
@@ -456,8 +506,15 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
                     {asgn.title}
                   </h4>
                   {isGraded ? (
-                    <span className="bg-[#FCD34D]/25 border border-[#FCD34D]/60 text-[#FCD34D] font-mono text-xs px-2 py-0.5 shrink-0 font-bold flex items-center gap-1">
-                      <Star size={10} className="fill-[#FCD34D]" />
+                    <span
+                      className="font-mono text-xs px-2 py-0.5 shrink-0 font-bold flex items-center gap-1 border"
+                      style={{
+                        color: getGradeColor(mySub!.grade).color,
+                        borderColor: `${getGradeColor(mySub!.grade).color}99`,
+                        backgroundColor: `${getGradeColor(mySub!.grade).color}33`,
+                      }}
+                    >
+                      <Star size={10} style={{ fill: getGradeColor(mySub!.grade).color }} />
                       {mySub!.grade}
                     </span>
                   ) : mySub ? (
@@ -498,8 +555,8 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
                 {isGraded && (
                   <div className="bg-[#FCD34D]/10 border-2 border-[#FCD34D]/30 px-3 py-2 flex flex-col gap-1.5">
                     <div className="flex items-center gap-2">
-                      <Star size={12} className="text-[#FCD34D] fill-[#FCD34D] shrink-0" />
-                      <span className="text-[#FCD34D] font-mono text-xs font-bold">
+                      <Star size={12} className="shrink-0" style={{ color: getGradeColor(mySub!.grade).color, fill: getGradeColor(mySub!.grade).color }} />
+                      <span className="font-mono text-xs font-bold" style={{ color: getGradeColor(mySub!.grade).color }}>
                         Grade: {mySub!.grade}
                       </span>
                       {mySub!.graded_at && (
