@@ -1,4 +1,6 @@
 -- Run this entire file in the Supabase SQL Editor (Dashboard → SQL Editor → New query)
+-- NOTE: If re-running, the "create table if not exists" clauses are safe to re-run.
+-- The uploaded_lessons table at the bottom is new — run it once to enable lesson uploads.
 
 -- ─── lesson_attempts ────────────────────────────────────────────────────────
 create table if not exists lesson_attempts (
@@ -57,6 +59,44 @@ create policy "read answers"
   using (
     auth.uid() = user_id
     or (
+      select raw_user_meta_data->>'role'
+      from auth.users
+      where id = auth.uid()
+    ) = 'teacher'
+  );
+
+-- ─── uploaded_lessons ────────────────────────────────────────────────────────
+create table if not exists uploaded_lessons (
+  id          uuid primary key default gen_random_uuid(),
+  created_by  uuid not null references auth.users(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  lesson_data jsonb not null
+);
+
+alter table uploaded_lessons enable row level security;
+
+-- Only teachers can insert lessons
+create policy "teachers insert lessons"
+  on uploaded_lessons for insert
+  with check (
+    (
+      select raw_user_meta_data->>'role'
+      from auth.users
+      where id = auth.uid()
+    ) = 'teacher'
+  );
+
+-- All authenticated users can read lessons
+create policy "all read lessons"
+  on uploaded_lessons for select
+  using (auth.uid() is not null);
+
+-- Teachers can delete their own uploaded lessons
+create policy "teachers delete own lessons"
+  on uploaded_lessons for delete
+  using (
+    auth.uid() = created_by
+    and (
       select raw_user_meta_data->>'role'
       from auth.users
       where id = auth.uid()

@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2 } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload } from 'lucide-react';
 import { lessons } from '../../data/lessons';
+import type { Lesson } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
 import { Sidebar } from '../components/Sidebar';
+import { UploadLessonModal } from '../components/UploadLessonModal';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
@@ -101,6 +103,15 @@ function TeacherDashboard({
 
   const [loading, setLoading] = useState(true);
 
+  const [uploadedLessons, setUploadedLessons] = useState<Lesson[]>([]);
+
+  const [showUpload, setShowUpload] = useState(false);
+
+  async function fetchUploadedLessons() {
+    const { data } = await supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true });
+    if (data) setUploadedLessons(data.map(r => r.lesson_data as Lesson));
+  }
+
   useEffect(() => {
 
     async function fetchStats() {
@@ -148,16 +159,26 @@ function TeacherDashboard({
     }
 
     fetchStats();
+    fetchUploadedLessons();
 
   }, []);
 
-  const modules = Array.from(new Set(lessons.map(l => l.module)));
+  const allLessons = [...lessons, ...uploadedLessons];
+
+  const modules = Array.from(new Set(allLessons.map(l => l.module)));
 
   const totalCompletions = Object.values(completionCounts).reduce((s, v) => s + v, 0);
 
   return (
 
     <div className="size-full min-h-screen relative overflow-hidden bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+
+      {showUpload && (
+        <UploadLessonModal
+          onClose={() => setShowUpload(false)}
+          onUploaded={fetchUploadedLessons}
+        />
+      )}
 
       <div className="absolute inset-0 opacity-30">
 
@@ -219,10 +240,10 @@ function TeacherDashboard({
                   Click any lesson to see student results and wrong answers
                 </p>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 items-start">
                 <div
                     className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
-                  <p className="text-[#83aeff] font-mono text-xl font-bold">{lessons.length}</p>
+                  <p className="text-[#83aeff] font-mono text-xl font-bold">{allLessons.length}</p>
                   <p className="text-white/60 font-mono text-xs">LESSONS</p>
                 </div>
                 <div
@@ -232,13 +253,20 @@ function TeacherDashboard({
                   </p>
                   <p className="text-white/60 font-mono text-xs">COMPLETIONS</p>
                 </div>
+                <button
+                  onClick={() => setShowUpload(true)}
+                  className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                >
+                  <Upload size={14} className="text-white" />
+                  <span className="text-white font-mono text-xs font-bold">UPLOAD LESSON</span>
+                </button>
               </div>
             </div>
           </div>
 
           {/* Lesson analytics cards grouped by module */}
           {modules.map(module => {
-            const moduleLessons = lessons.filter(l => l.module === module);
+            const moduleLessons = allLessons.filter(l => l.module === module);
             return (
                 <div
                     key={module}
@@ -325,36 +353,43 @@ function StudentDashboard({
   const navigate = useNavigate();
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [totalXp, setTotalXp] = useState(0);
+  const [uploadedLessons, setUploadedLessons] = useState<Lesson[]>([]);
 
   useEffect(() => {
-    async function fetchProgress() {
+    async function fetchData() {
       const {data: {user}} = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase
-        .from('lesson_attempts')
-        .select('lesson_id, xp_earned')
-        .eq('user_id', user.id);
-      if (data) {
-        setCompletedIds(new Set(data.map(a => a.lesson_id as string)));
-        setTotalXp(data.reduce((sum, a) => sum + (a.xp_earned as number), 0));
+
+      const [attemptsRes, uploadedRes] = await Promise.all([
+        supabase.from('lesson_attempts').select('lesson_id, xp_earned').eq('user_id', user.id),
+        supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true }),
+      ]);
+
+      if (attemptsRes.data) {
+        setCompletedIds(new Set(attemptsRes.data.map(a => a.lesson_id as string)));
+        setTotalXp(attemptsRes.data.reduce((sum, a) => sum + (a.xp_earned as number), 0));
+      }
+      if (uploadedRes.data) {
+        setUploadedLessons(uploadedRes.data.map(r => r.lesson_data as Lesson));
       }
     }
-    fetchProgress();
+    fetchData();
   }, []);
 
+  const allLessons = [...lessons, ...uploadedLessons];
   const completedCount = completedIds.size;
-  const modules = Array.from(new Set(lessons.map(l => l.module)));
+  const modules = Array.from(new Set(allLessons.map(l => l.module)));
 
-  function getStatus(lesson: typeof lessons[0]): LessonStatus {
+  function getStatus(lesson: Lesson): LessonStatus {
     if (completedIds.has(lesson.id)) return 'completed';
-    const moduleLessons = lessons.filter(l => l.module === lesson.module);
+    const moduleLessons = allLessons.filter(l => l.module === lesson.module);
     const idx = moduleLessons.findIndex(l => l.id === lesson.id);
     if (idx === 0) return 'in-progress';
     const prev = moduleLessons[idx - 1];
     return completedIds.has(prev.id) ? 'in-progress' : 'locked';
   }
 
-  function handleLessonClick(lesson: typeof lessons[0]) {
+  function handleLessonClick(lesson: Lesson) {
     if (getStatus(lesson) === 'locked') return;
     navigate(`/lesson/${lesson.id}`);
   }
@@ -408,7 +443,7 @@ function StudentDashboard({
               </div>
               <div className="flex gap-4">
                 <div className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
-                  <p className="text-[#72b149] font-mono text-xl font-bold drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">{completedCount}/{lessons.length}</p>
+                  <p className="text-[#72b149] font-mono text-xl font-bold drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">{completedCount}/{allLessons.length}</p>
                   <p className="text-white/60 font-mono text-xs">LESSONS</p>
                 </div>
                 <div className="bg-[#3C3C3C] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
@@ -420,12 +455,12 @@ function StudentDashboard({
             <div className="mt-4">
               <div className="flex justify-between mb-1">
                 <span className="text-white font-mono text-xs">OVERALL PROGRESS</span>
-                <span className="text-white font-mono text-xs">{Math.round((completedCount / lessons.length) * 100)}%</span>
+                <span className="text-white font-mono text-xs">{Math.round((completedCount / allLessons.length) * 100)}%</span>
               </div>
               <div className="h-4 bg-[#3C3C3C] border-2 border-black">
                 <div
                   className="h-full bg-[#72b149] transition-all"
-                  style={{ width: `${(completedCount / lessons.length) * 100}%` }}
+                  style={{ width: `${(completedCount / allLessons.length) * 100}%` }}
                 />
               </div>
             </div>
@@ -433,7 +468,7 @@ function StudentDashboard({
 
           {/* Lesson blocks grouped by module */}
           {modules.map(module => {
-            const moduleLessons = lessons.filter(l => l.module === module);
+            const moduleLessons = allLessons.filter(l => l.module === module);
             return (
               <div
                 key={module}

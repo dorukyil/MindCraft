@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { supabase } from '../lib/supabase/client';
 import { lessons } from '../../data/lessons';
+import type { Lesson } from '../../data/lessons';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { ArrowLeft, ChevronDown, ChevronRight, CheckCircle, XCircle, Users, Loader2 } from 'lucide-react';
 import { MinecraftButton } from '../components/MinecraftButton';
@@ -30,8 +31,7 @@ export function TeacherLessonView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const lesson = lessons.find(l => l.id === id);
-
+  const [lesson, setLesson] = useState<Lesson | null | undefined>(undefined);
   const [attempts, setAttempts] = useState<Attempt[]>([]);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +42,19 @@ export function TeacherLessonView() {
 
     async function fetchData() {
       setLoading(true);
+
+      // Try static lessons first, then fall back to uploaded_lessons
+      const staticLesson = lessons.find(l => l.id === id);
+      if (staticLesson) {
+        setLesson(staticLesson);
+      } else {
+        const { data } = await supabase
+          .from('uploaded_lessons')
+          .select('lesson_data')
+          .eq('lesson_data->>id', id)
+          .maybeSingle();
+        setLesson(data ? (data.lesson_data as Lesson) : null);
+      }
 
       const [attemptsRes, answersRes] = await Promise.all([
         supabase
@@ -89,7 +102,15 @@ export function TeacherLessonView() {
     ? Math.round(attempts.reduce((sum, a) => sum + pct(a.correct_count, a.total_questions), 0) / attempts.length)
     : 0;
 
-  if (!lesson) {
+  if (lesson === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+        <p className="text-white font-mono text-sm animate-pulse">LOADING...</p>
+      </div>
+    );
+  }
+
+  if (lesson === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
         <p className="text-white font-mono">Lesson not found.</p>

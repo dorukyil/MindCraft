@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import type { User } from '@supabase/supabase-js';
 import { lessons, LessonStep } from '../../data/lessons';
+import type { Lesson } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { BookOpen, AlertTriangle, Pencil, CheckCircle, XCircle, ArrowLeft, Star, Loader2 } from 'lucide-react';
@@ -195,8 +196,7 @@ export function LessonPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const lesson = lessons.find(l => l.id === id);
-
+  const [lesson, setLesson] = useState<Lesson | null | undefined>(undefined);
   const [user, setUser] = useState<User | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [answered, setAnswered] = useState(false);
@@ -214,9 +214,30 @@ export function LessonPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
-  }, []);
 
-  if (!lesson) {
+    if (!id) return;
+    const staticLesson = lessons.find(l => l.id === id);
+    if (staticLesson) {
+      setLesson(staticLesson);
+    } else {
+      supabase
+        .from('uploaded_lessons')
+        .select('lesson_data')
+        .eq('lesson_data->>id', id)
+        .maybeSingle()
+        .then(({ data }) => setLesson(data ? (data.lesson_data as Lesson) : null));
+    }
+  }, [id]);
+
+  if (lesson === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+        <p className="text-white font-mono text-sm animate-pulse">LOADING...</p>
+      </div>
+    );
+  }
+
+  if (lesson === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
         <p className="text-white font-mono text-lg">Lesson not found.</p>
