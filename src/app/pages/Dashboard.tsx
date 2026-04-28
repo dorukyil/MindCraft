@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload, ClipboardList } from 'lucide-react';
 import { lessons } from '../../data/lessons';
 import type { Lesson } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
 import { Sidebar } from '../components/Sidebar';
 import { UploadLessonModal } from '../components/UploadLessonModal';
+import { UploadAssignmentModal } from '../components/UploadAssignmentModal';
+import { AssignmentSection } from '../components/AssignmentSection';
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
@@ -107,6 +109,10 @@ function TeacherDashboard({
 
   const [showUpload, setShowUpload] = useState(false);
 
+  const [showUploadAssignment, setShowUploadAssignment] = useState(false);
+
+  const [assignmentRefreshKey, setAssignmentRefreshKey] = useState(0);
+
   async function fetchUploadedLessons() {
     const { data } = await supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true });
     if (data) setUploadedLessons(data.map(r => r.lesson_data as Lesson));
@@ -177,6 +183,13 @@ function TeacherDashboard({
         <UploadLessonModal
           onClose={() => setShowUpload(false)}
           onUploaded={fetchUploadedLessons}
+        />
+      )}
+
+      {showUploadAssignment && (
+        <UploadAssignmentModal
+          onClose={() => setShowUploadAssignment(false)}
+          onCreated={() => setAssignmentRefreshKey(k => k + 1)}
         />
       )}
 
@@ -253,16 +266,28 @@ function TeacherDashboard({
                   </p>
                   <p className="text-white/60 font-mono text-xs">COMPLETIONS</p>
                 </div>
-                <button
-                  onClick={() => setShowUpload(true)}
-                  className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
-                >
-                  <Upload size={14} className="text-white" />
-                  <span className="text-white font-mono text-xs font-bold">UPLOAD LESSON</span>
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => setShowUpload(true)}
+                    className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                  >
+                    <Upload size={14} className="text-white" />
+                    <span className="text-white font-mono text-xs font-bold">UPLOAD LESSON</span>
+                  </button>
+                  <button
+                    onClick={() => setShowUploadAssignment(true)}
+                    className="flex items-center gap-2 bg-[#FCD34D] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                  >
+                    <ClipboardList size={14} className="text-black" />
+                    <span className="text-black font-mono text-xs font-bold">UPLOAD ASSIGNMENT</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Assignments section */}
+          <AssignmentSection isTeacher={true} refreshKey={assignmentRefreshKey} />
 
           {/* Lesson analytics cards grouped by module */}
           {modules.map(module => {
@@ -465,6 +490,9 @@ function StudentDashboard({
               </div>
             </div>
           </div>
+
+          {/* Assignments section */}
+          <AssignmentSection isTeacher={false} />
 
           {/* Lesson blocks grouped by module */}
           {modules.map(module => {
