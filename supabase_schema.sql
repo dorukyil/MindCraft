@@ -156,6 +156,17 @@ create policy "read submissions"
     or (auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher'
   );
 
+drop policy if exists "teachers update submissions" on assignment_submissions;
+create policy "teachers update submissions"
+  on assignment_submissions for update
+  using ((auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher')
+  with check ((auth.jwt() -> 'user_metadata' ->> 'role') = 'teacher');
+
+-- ─── Grading columns (safe to re-run) ────────────────────────────────────────
+alter table assignment_submissions add column if not exists grade      text;
+alter table assignment_submissions add column if not exists feedback   text;
+alter table assignment_submissions add column if not exists graded_at  timestamptz;
+
 -- ─── Storage bucket: assignments ─────────────────────────────────────────────
 -- Rubric files go to:   rubrics/{assignment_id}/{filename}
 -- Student files go to:  submissions/{assignment_id}/{user_id}/{filename}
