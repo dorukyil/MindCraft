@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase/client';
+import { gradeSubmission, type GeminiGradeResult } from '../lib/gemini';
 import {
   Calendar, CheckCircle, ChevronDown, ChevronRight,
-  Download, FileText, Loader2, Upload, Star, MessageSquare,
+  Download, FileText, Loader2, Upload, Star, MessageSquare, Sparkles,
 } from 'lucide-react';
 
 interface Assignment {
@@ -113,6 +114,9 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
   const [savingGradeId, setSavingGradeId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [geminiLoadingId, setGeminiLoadingId] = useState<string | null>(null);
+  const [aiReport, setAiReport] = useState<(GeminiGradeResult & { subId: string }) | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -157,6 +161,57 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
     setGradingId(null);
     setGradeInput('');
     setFeedbackInput('');
+    setAiReport(null);
+    setAiError(null);
+  }
+
+  async function fetchFileBytes(path: string): Promise<ArrayBuffer> {
+    const { data } = await supabase.storage
+      .from('assignments')
+      .createSignedUrl(path, 120);
+    if (!data?.signedUrl) throw new Error('Could not get file URL');
+    const res = await fetch(data.signedUrl);
+    if (!res.ok) throw new Error('Could not download file');
+    return res.arrayBuffer();
+  }
+
+  async function gradeWithGemini(sub: Submission, asgn: Assignment) {
+    setGradingId(null);
+    setGradeInput('');
+    setFeedbackInput('');
+    setAiReport(null);
+    setAiError(null);
+    setGeminiLoadingId(sub.id);
+
+    try {
+      const submissionBytes = await fetchFileBytes(sub.file_path);
+
+      let rubricBytes: ArrayBuffer | undefined;
+      let rubricName: string | undefined;
+      if (asgn.rubric_path) {
+        rubricBytes = await fetchFileBytes(asgn.rubric_path);
+        rubricName = asgn.rubric_path.split('/').pop();
+      }
+
+      const result = await gradeSubmission({
+        submissionBytes,
+        submissionName: sub.file_name,
+        rubricBytes,
+        rubricName,
+        assignmentTitle: asgn.title,
+        assignmentDescription: asgn.description,
+      });
+
+      setGradingId(sub.id);
+      setGradeInput(result.suggestedGrade);
+      setFeedbackInput(result.studentFeedback);
+      setAiReport({ subId: sub.id, ...result });
+    } catch (err) {
+      setGradingId(sub.id);
+      setAiError(err instanceof Error ? err.message : 'AI grading failed');
+    } finally {
+      setGeminiLoadingId(null);
+    }
   }
 
   async function saveGrade(subId: string) {
@@ -383,6 +438,23 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
                                     <span className="hidden sm:inline">Download</span>
                                   </button>
 
+                                  {/* AI Grade button */}
+                                  <button
+                                    onClick={() => gradeWithGemini(sub, asgn)}
+                                    disabled={geminiLoadingId !== null}
+                                    className={`flex items-center gap-1 font-mono text-xs shrink-0 transition-colors disabled:opacity-40 ${
+                                      geminiLoadingId === sub.id ? 'text-purple-400 cursor-wait' : 'text-purple-400 hover:text-white'
+                                    }`}
+                                  >
+                                    {geminiLoadingId === sub.id
+                                      ? <Loader2 size={12} className="animate-spin" />
+                                      : <Sparkles size={12} />
+                                    }
+                                    <span className="hidden sm:inline">
+                                      {geminiLoadingId === sub.id ? 'Grading...' : 'AI Grade'}
+                                    </span>
+                                  </button>
+
                                   {/* Grade / Edit button */}
                                   <button
                                     onClick={() => gradingId === sub.id ? closeGradeForm() : openGradeForm(sub)}
@@ -402,6 +474,21 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
                                 {/* Inline grade form */}
                                 {gradingId === sub.id && (
                                   <div className="bg-black/20 border-l-4 border-[#FCD34D]/60 px-3 py-3 flex flex-col gap-2">
+                                    {aiReport?.subId === sub.id && (
+                                      <div className="bg-[#1e1040] border border-purple-500/40 px-3 py-2.5 flex flex-col gap-2">
+                                        <div className="flex items-center gap-2 text-purple-300 font-mono text-xs font-bold">
+                                          <Sparkles size={12} />
+                                          GEMINI GRADING REPORT
+                                        </div>
+                                        <p className="text-white/70 font-mono text-xs leading-relaxed whitespace-pre-wrap">{aiReport.report}</p>
+                                        <p className="text-purple-400/60 font-mono text-[10px]">Review and edit below before saving.</p>
+                                      </div>
+                                    )}
+                                    {aiError && (
+                                      <div className="bg-red-900/20 border border-red-500/40 px-3 py-2 text-red-400 font-mono text-xs">
+                                        AI grading failed: {aiError}
+                                      </div>
+                                    )}
                                     <div className="flex gap-2 items-center">
                                       <label className="text-white/50 font-mono text-xs shrink-0 w-16">GRADE</label>
                                       <input
