@@ -17,16 +17,13 @@ export function Login() {
     setError(null);
     setLoading(true);
 
-    // Simple frontend validation
-    if (email && password) {
-      // Simulate a brief loading state
-      setTimeout(() => {
-        navigate('/dashboard');
-        setLoading(false);
-      }, 500);
-    } else {
-      setError('Please enter both email and password');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setError(error.message);
       setLoading(false);
+    } else {
+      navigate('/dashboard');
     }
   };
 
