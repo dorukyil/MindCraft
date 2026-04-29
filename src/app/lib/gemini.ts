@@ -42,7 +42,7 @@ export async function gradeSubmission(params: {
   assignmentTitle: string;
   assignmentDescription?: string | null;
 }): Promise<GeminiGradeResult> {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
   const submissionPart = await parseFile(params.submissionBytes, params.submissionName);
   const rubricPart =
