@@ -5,6 +5,7 @@ import { MinecraftInput } from '../components/MinecraftInput';
 import { ArrowLeft } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { Home } from 'lucide-react';
+import { supabase } from '../lib/supabase/client';
 
 export function Signup() {
   const navigate = useNavigate();
@@ -36,20 +37,42 @@ export function Signup() {
     }
     setLoading(true);
 
-    // Simulate account creation
-    setTimeout(() => {
-      setMessage('Account created successfully! Redirecting to dashboard...');
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        data: {
+          full_name: formData.fullName,
+          name: formData.fullName,
+          role,
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message);
       setLoading(false);
-    }, 500);
+    } else if (data.session) {
+      navigate('/dashboard');
+    } else {
+      setMessage('Account created! Check your email to confirm your account, then log in.');
+      setLoading(false);
+    }
   };
 
-  const handleGoogleSignup = () => {
-    console.log('Google signup clicked');
-    // In a real app, this would trigger OAuth flow
-    navigate('/dashboard');
+  const handleGoogleSignup = async () => {
+    setError(null);
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
   };
 
   return (
