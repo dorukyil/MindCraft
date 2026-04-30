@@ -127,6 +127,8 @@ function TeacherDashboard({
   const [classroomLoading, setClassroomLoading] = useState(true);
   const [codeCopied, setCodeCopied] = useState(false);
   const [classroomNameInput, setClassroomNameInput] = useState('');
+  const [editingName, setEditingName] = useState(false);
+  const [renamingName, setRenamingName] = useState('');
   const [showRoster, setShowRoster] = useState(false);
   const [roster, setRoster] = useState<{ student_name: string | null; joined_at: string }[]>([]);
   const [rosterLoading, setRosterLoading] = useState(false);
@@ -198,6 +200,19 @@ function TeacherDashboard({
     if (!classroom) return;
     if (!showRoster) fetchRoster(classroom.id);
     setShowRoster(r => !r);
+  }
+
+  async function renameClassroom() {
+    const name = renamingName.trim();
+    if (!name || !classroom) return;
+    const { error } = await supabase
+      .from('classrooms')
+      .update({ name })
+      .eq('id', classroom.id);
+    if (!error) {
+      setClassroom({ ...classroom, name });
+      setEditingName(false);
+    }
   }
 
   useEffect(() => {
@@ -391,7 +406,31 @@ function TeacherDashboard({
                 {/* Code + stats row */}
                 <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                   <div className="flex-1">
-                    <p className="text-white/50 font-mono text-xs mb-1">{classroom.name.toUpperCase()} — SHARE THIS CODE WITH YOUR STUDENTS</p>
+                    {/* Classroom name + inline rename */}
+                    {editingName ? (
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <input
+                          autoFocus
+                          value={renamingName}
+                          onChange={e => setRenamingName(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') renameClassroom(); if (e.key === 'Escape') setEditingName(false); }}
+                          className="bg-[#1a1a1a] border-4 border-[#83aeff] text-white font-mono text-sm px-3 py-1 outline-none"
+                        />
+                        <button onClick={renameClassroom} className="bg-[#72b149] border-4 border-black px-3 py-1 text-white font-mono text-xs font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] hover:brightness-110">SAVE</button>
+                        <button onClick={() => setEditingName(false)} className="bg-[#3C3C3C] border-4 border-black px-3 py-1 text-white/60 font-mono text-xs shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)] hover:brightness-110">CANCEL</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-white/50 font-mono text-xs">{classroom.name.toUpperCase()} — SHARE THIS CODE WITH YOUR STUDENTS</p>
+                        <button
+                          onClick={() => { setRenamingName(classroom.name); setEditingName(true); }}
+                          className="text-white/30 hover:text-white/70 transition-colors"
+                          title="Rename classroom"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                        </button>
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-[#FCD34D] font-mono text-4xl font-bold drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] tracking-[8px]">
                         {classroom.class_code}
@@ -790,11 +829,21 @@ function StudentDashboard({
             </div>
           )}
 
-          {/* Assignments section */}
-          <AssignmentSection isTeacher={false} />
+          {/* Assignments + lessons — only visible after joining a class */}
+          {classroomChecked && !classroom && (
+            <div
+              className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-10 mb-6 flex flex-col items-center gap-4"
+              style={{ imageRendering: 'pixelated' }}
+            >
+              <Lock size={32} className="text-white/20" />
+              <p className="text-white/50 font-mono text-sm text-center">JOIN A CLASSROOM ABOVE TO ACCESS LESSONS AND ASSIGNMENTS</p>
+            </div>
+          )}
+
+          {classroom && <AssignmentSection isTeacher={false} />}
 
           {/* Lesson blocks grouped by module */}
-          {modules.map(module => {
+          {classroom && modules.map(module => {
             const moduleLessons = allLessons.filter(l => l.module === module);
             return (
               <div
