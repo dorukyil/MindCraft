@@ -117,23 +117,22 @@ export function Profile() {
       {/* Sidebar */}
         <Sidebar onLogout={() => navigate('/')} />
 
-      {/* Back to dashboard button */}
-      <div className="mb-6">
-        <MinecraftButton
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 font-mono text-sm">
-          <ArrowLeft size={14} />
-          DASHBOARD
-        </MinecraftButton>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center h-64 text-white font-mono text-sm animate-pulse">
           LOADING...
         </div>
       ) : (
         <div className="max-w-3xl mx-auto flex flex-col gap-6">
-
+          {/*Back to dashboard button*/}
+          <div className="mb-6">
+            <MinecraftButton
+              onClick={() => navigate('/dashboard')}
+              className="flex items-center gap-2 font-mono text-sm">
+              <ArrowLeft size={14} />
+              DASHBOARD
+            </MinecraftButton>
+          </div>
+          
           {/* ── Player card ── */}
           <div className="bg-[#3C3C3C] border-4 border-black shadow-[6px_6px_0px_black] p-6 flex items-center gap-6">
             <div className="w-16 h-16 bg-[#976d4c] border-4 border-black flex items-center justify-center text-white font-mono text-2xl font-bold shadow-[4px_4px_0px_black] shrink-0">
