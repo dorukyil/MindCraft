@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase/client';
-import { gradeSubmission, type GeminiGradeResult } from '../lib/gemini';
+import { gradeSubmission, type AIGradeResult } from '../lib/ai';
 import {
   Calendar, CheckCircle, ChevronDown, ChevronRight,
   Download, FileText, Loader2, Upload, Star, MessageSquare, Sparkles,
@@ -115,7 +115,7 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
 
   const [loading, setLoading] = useState(true);
   const [geminiLoadingId, setGeminiLoadingId] = useState<string | null>(null);
-  const [aiReport, setAiReport] = useState<(GeminiGradeResult & { subId: string }) | null>(null);
+  const [aiReport, setAiReport] = useState<(AIGradeResult & { subId: string }) | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -478,7 +478,7 @@ export function AssignmentSection({ isTeacher, refreshKey }: Props) {
                                       <div className="bg-[#1e1040] border border-purple-500/40 px-3 py-2.5 flex flex-col gap-2">
                                         <div className="flex items-center gap-2 text-purple-300 font-mono text-xs font-bold">
                                           <Sparkles size={12} />
-                                          GEMINI GRADING REPORT
+                                          AI GRADING REPORT
                                         </div>
                                         <p className="text-white/70 font-mono text-xs leading-relaxed whitespace-pre-wrap">{aiReport.report}</p>
                                         <p className="text-purple-400/60 font-mono text-[10px]">Review and edit below before saving.</p>
