@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload, ClipboardList } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload, ClipboardList, Copy, Check, LogIn, School } from 'lucide-react';
 import { lessons } from '../../data/lessons';
 import type { Lesson } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
@@ -10,6 +10,16 @@ import { Sidebar } from '../components/Sidebar';
 import { UploadLessonModal } from '../components/UploadLessonModal';
 import { UploadAssignmentModal } from '../components/UploadAssignmentModal';
 import { AssignmentSection } from '../components/AssignmentSection';
+
+interface Classroom {
+  id: string;
+  class_code: string;
+  name: string;
+}
+
+function generateClassCode(): string {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
 
 type LessonStatus = 'completed' | 'in-progress' | 'locked';
 
@@ -113,9 +123,56 @@ function TeacherDashboard({
 
   const [assignmentRefreshKey, setAssignmentRefreshKey] = useState(0);
 
+  const [classroom, setClassroom] = useState<(Classroom & { student_count: number }) | null>(null);
+
+  const [classroomLoading, setClassroomLoading] = useState(true);
+
+  const [codeCopied, setCodeCopied] = useState(false);
+
   async function fetchUploadedLessons() {
     const { data } = await supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true });
     if (data) setUploadedLessons(data.map(r => r.lesson_data as Lesson));
+  }
+
+  async function fetchClassroom() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setClassroomLoading(false); return; }
+
+    const { data } = await supabase
+      .from('classrooms')
+      .select('id, class_code, name')
+      .eq('teacher_id', user.id)
+      .single();
+
+    if (data) {
+      const { count } = await supabase
+        .from('classroom_members')
+        .select('*', { count: 'exact', head: true })
+        .eq('classroom_id', data.id);
+      setClassroom({ ...data, student_count: count ?? 0 });
+    }
+    setClassroomLoading(false);
+  }
+
+  async function createClassroom() {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const code = generateClassCode();
+    const { data } = await supabase
+      .from('classrooms')
+      .insert({ teacher_id: user.id, class_code: code, name: 'My Classroom' })
+      .select('id, class_code, name')
+      .single();
+
+    if (data) setClassroom({ ...data, student_count: 0 });
+  }
+
+  function copyCode() {
+    if (!classroom) return;
+    navigator.clipboard.writeText(classroom.class_code);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
   }
 
   useEffect(() => {
@@ -166,6 +223,7 @@ function TeacherDashboard({
 
     fetchStats();
     fetchUploadedLessons();
+    fetchClassroom();
 
   }, []);
 
@@ -286,6 +344,61 @@ function TeacherDashboard({
             </div>
           </div>
 
+          {/* Classroom code section */}
+          <div
+            className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
+            style={{ imageRendering: 'pixelated' }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <School size={18} className="text-[#83aeff]" />
+              <h3
+                className="text-lg text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+                style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
+              >
+                YOUR CLASSROOM
+              </h3>
+            </div>
+
+            {classroomLoading ? (
+              <p className="text-white/40 font-mono text-xs animate-pulse">LOADING...</p>
+            ) : classroom ? (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div>
+                  <p className="text-white/50 font-mono text-xs mb-1">SHARE THIS CODE WITH YOUR STUDENTS</p>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className="text-[#FCD34D] font-mono text-4xl font-bold drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] tracking-[8px]"
+                    >
+                      {classroom.class_code}
+                    </span>
+                    <button
+                      onClick={copyCode}
+                      className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                    >
+                      {codeCopied ? <Check size={14} className="text-[#72b149]" /> : <Copy size={14} className="text-white" />}
+                      <span className="text-white font-mono text-xs">{codeCopied ? 'COPIED!' : 'COPY'}</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="sm:ml-auto bg-[#2a2a2a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
+                  <p className="text-[#83aeff] font-mono text-xl font-bold">{classroom.student_count}</p>
+                  <p className="text-white/60 font-mono text-xs">STUDENTS ENROLLED</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <p className="text-white/60 font-mono text-xs">You don't have a classroom yet. Create one to get a shareable code.</p>
+                <button
+                  onClick={createClassroom}
+                  className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110 whitespace-nowrap"
+                >
+                  <School size={14} className="text-white" />
+                  <span className="text-white font-mono text-xs font-bold">CREATE CLASSROOM</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Assignments section */}
           <AssignmentSection isTeacher={true} refreshKey={assignmentRefreshKey} />
 
@@ -379,15 +492,21 @@ function StudentDashboard({
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [totalXp, setTotalXp] = useState(0);
   const [uploadedLessons, setUploadedLessons] = useState<Lesson[]>([]);
+  const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [classroomChecked, setClassroomChecked] = useState(false);
+  const [classCodeInput, setClassCodeInput] = useState('');
+  const [joinError, setJoinError] = useState('');
+  const [joining, setJoining] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       const {data: {user}} = await supabase.auth.getUser();
       if (!user) return;
 
-      const [attemptsRes, uploadedRes] = await Promise.all([
+      const [attemptsRes, uploadedRes, memberRes] = await Promise.all([
         supabase.from('lesson_attempts').select('lesson_id, xp_earned').eq('user_id', user.id),
         supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true }),
+        supabase.from('classroom_members').select('classrooms(id, class_code, name)').eq('student_id', user.id).maybeSingle(),
       ]);
 
       if (attemptsRes.data) {
@@ -397,9 +516,47 @@ function StudentDashboard({
       if (uploadedRes.data) {
         setUploadedLessons(uploadedRes.data.map(r => r.lesson_data as Lesson));
       }
+      if (memberRes.data?.classrooms) {
+        setClassroom(memberRes.data.classrooms as unknown as Classroom);
+      }
+      setClassroomChecked(true);
     }
     fetchData();
   }, []);
+
+  async function joinClassroom() {
+    const code = classCodeInput.trim().toUpperCase();
+    if (!code) return;
+    setJoining(true);
+    setJoinError('');
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setJoining(false); return; }
+
+    const { data: room } = await supabase
+      .from('classrooms')
+      .select('id, class_code, name')
+      .eq('class_code', code)
+      .maybeSingle();
+
+    if (!room) {
+      setJoinError('Class code not found. Check with your teacher.');
+      setJoining(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from('classroom_members')
+      .insert({ classroom_id: room.id, student_id: user.id });
+
+    if (error) {
+      setJoinError(error.code === '23505' ? 'You already joined this class.' : 'Failed to join. Try again.');
+    } else {
+      setClassroom(room);
+      setClassCodeInput('');
+    }
+    setJoining(false);
+  }
 
   const allLessons = [...lessons, ...uploadedLessons];
   const completedCount = completedIds.size;
@@ -490,6 +647,63 @@ function StudentDashboard({
               </div>
             </div>
           </div>
+
+          {/* Classroom section */}
+          {classroomChecked && (
+            <div
+              className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
+              style={{ imageRendering: 'pixelated' }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <School size={18} className="text-[#83aeff]" />
+                <h3
+                  className="text-lg text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]"
+                  style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
+                >
+                  YOUR CLASSROOM
+                </h3>
+              </div>
+
+              {classroom ? (
+                <div className="flex items-center gap-4">
+                  <CheckCircle size={16} className="text-[#72b149] shrink-0" />
+                  <div>
+                    <p className="text-[#72b149] font-mono text-xs font-bold">ENROLLED</p>
+                    <p className="text-white font-mono text-sm">{classroom.name}</p>
+                  </div>
+                  <div className="ml-auto bg-[#2a2a2a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
+                    <p className="text-[#FCD34D] font-mono text-lg font-bold tracking-widest">{classroom.class_code}</p>
+                    <p className="text-white/60 font-mono text-xs">CLASS CODE</p>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-white/60 font-mono text-xs mb-3">Enter the class code your teacher gave you to join their classroom.</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <input
+                      value={classCodeInput}
+                      onChange={e => { setClassCodeInput(e.target.value.toUpperCase()); setJoinError(''); }}
+                      onKeyDown={e => e.key === 'Enter' && joinClassroom()}
+                      maxLength={6}
+                      placeholder="XXXXXX"
+                      className="bg-[#1a1a1a] border-4 border-black text-[#FCD34D] font-mono text-xl tracking-[6px] px-4 py-2 w-44 outline-none placeholder:text-white/20 uppercase"
+                    />
+                    <button
+                      onClick={joinClassroom}
+                      disabled={joining || classCodeInput.trim().length < 6}
+                      className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <LogIn size={14} className="text-white" />
+                      <span className="text-white font-mono text-xs font-bold">{joining ? 'JOINING...' : 'JOIN CLASS'}</span>
+                    </button>
+                  </div>
+                  {joinError && (
+                    <p className="text-red-400 font-mono text-xs mt-2">{joinError}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Assignments section */}
           <AssignmentSection isTeacher={false} />
