@@ -17,7 +17,7 @@ const tiers = [
     accentColor: 'text-white/80',
     btnBg: 'bg-gradient-to-b from-[#555] to-[#3a3a3a]',
     btnText: 'text-white',
-    btnLabel: 'CURRENT PLAN',
+    btnLabel: 'FREE PLAN',
     icon: Shield,
     iconColor: 'text-white/60',
     priceColor: 'text-white',
