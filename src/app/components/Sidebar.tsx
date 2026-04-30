@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Menu, User, CreditCard, LogOut } from 'lucide-react';
+import { Menu, User, CreditCard, LayoutDashboard, LogOut } from 'lucide-react';
 
 export function Sidebar({ onLogout }: { onLogout: () => void }) {
   const [open, setOpen] = useState(false);
@@ -47,6 +47,17 @@ export function Sidebar({ onLogout }: { onLogout: () => void }) {
             >
               <CreditCard size={18} />
               SUBSCRIPTIONS
+            </button>
+            {/* Dashboard */}
+            <button
+              onClick={() => {
+                navigate('/dashboard');
+                setOpen(false);
+              }}
+              className="flex items-center gap-4 text-white hover:text-[#72b149]"
+            >
+              <LayoutDashboard size={18} />
+              DASHBOARD
             </button>
           </div>
 
