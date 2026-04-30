@@ -241,7 +241,7 @@ export const lessons: Lesson[] = [
       },
       {
         type: 'mcq',
-        question: 'Fill in the blank: "The referee wearing a ___ jacket blew his whistle." (blew / blue)',
+        question: 'Fill in the blank: "The referee wearing a ___ jacket ___ his whistle." (blew / blue)',
         options: ['blew jacket, blew whistle', 'blue jacket, blue whistle', 'blue jacket, blew whistle', 'blew jacket, blue whistle'],
         correctIndex: 2,
         explanation: '"Blue" is the colour of the jacket. "Blew" is the past tense of "blow" — he blew his whistle.',
