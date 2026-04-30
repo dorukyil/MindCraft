@@ -999,18 +999,21 @@ function ParentDashboard({ firstName, onLogout }: { firstName: string; onLogout:
   const [submissions, setSubmissions] = useState<{ assignment_id: string; grade: string | null; feedback: string | null; submitted_at: string; file_name: string }[]>([]);
   const [assignments, setAssignments] = useState<{ id: string; title: string; description: string | null; due_date: string | null }[]>([]);
   const [uploadedLessons, setUploadedLessons] = useState<Lesson[]>([]);
+  const [studentInClassroom, setStudentInClassroom] = useState(false);
 
   async function fetchStudentData(studentId: string) {
-    const [attRes, subRes, asgRes, upRes] = await Promise.all([
+    const [attRes, subRes, asgRes, upRes, memberRes] = await Promise.all([
       supabase.from('lesson_attempts').select('lesson_id, correct_count, total_questions, xp_earned').eq('user_id', studentId),
       supabase.from('assignment_submissions').select('assignment_id, grade, feedback, submitted_at, file_name').eq('user_id', studentId),
       supabase.from('assignments').select('id, title, description, due_date').order('created_at', { ascending: false }),
       supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true }),
+      supabase.from('classroom_members').select('id').eq('student_id', studentId).maybeSingle(),
     ]);
     setAttempts(attRes.data ?? []);
     setSubmissions(subRes.data ?? []);
     setAssignments(asgRes.data ?? []);
     setUploadedLessons((upRes.data ?? []).map(r => r.lesson_data as Lesson));
+    setStudentInClassroom(!!memberRes.data);
   }
 
   useEffect(() => {
@@ -1143,58 +1146,69 @@ function ParentDashboard({ firstName, onLogout }: { firstName: string; onLogout:
                 </div>
               </div>
 
-              {/* ── Assignments ── */}
-              <div className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6" style={{ imageRendering: 'pixelated' }}>
-                <h3 className="text-lg text-white mb-4 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]" style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>ASSIGNMENTS</h3>
-                <div className="flex items-center gap-2 mb-5">
-                  <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#FCD34D] to-transparent" />
-                  <div className="w-2 h-2 bg-[#FCD34D] rotate-45" />
-                  <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#FCD34D] to-transparent" />
+              {/* ── Not in classroom yet ── */}
+              {!studentInClassroom && (
+                <div className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-10 mb-6 flex flex-col items-center gap-3" style={{ imageRendering: 'pixelated' }}>
+                  <Lock size={28} className="text-white/20" />
+                  <p className="text-white/50 font-mono text-sm text-center">YOUR CHILD HASN'T JOINED A CLASSROOM YET</p>
+                  <p className="text-white/30 font-mono text-xs text-center">Lessons and assignments will appear here once they join their teacher's class.</p>
                 </div>
-                {assignments.length === 0 ? (
-                  <p className="text-white/40 font-mono text-xs text-center py-4">No assignments yet.</p>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    {assignments.map(a => {
-                      const sub = submissions.find(s => s.assignment_id === a.id);
-                      const overdue = a.due_date && isOverdue(a.due_date) && !sub;
-                      return (
-                        <div key={a.id} className={`bg-[#3C3C3C] border-4 ${sub?.grade ? 'border-[#FCD34D]/60' : sub ? 'border-[#72b149]/50' : overdue ? 'border-red-500/50' : 'border-white/10'} px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2`}>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-mono text-xs font-bold truncate">{a.title}</p>
-                            {a.due_date && (
-                              <p className={`font-mono text-[10px] mt-0.5 ${overdue ? 'text-red-400' : 'text-white/40'}`}>
-                                Due {fmtDate(a.due_date)}{overdue ? ' — OVERDUE' : ''}
-                              </p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 shrink-0">
-                            {sub ? (
-                              <>
-                                <span className="text-[#72b149] font-mono text-xs flex items-center gap-1">
-                                  <CheckCircle size={11} /> Submitted {fmtDate(sub.submitted_at)}
-                                </span>
-                                {sub.grade ? (
-                                  <span className="bg-[#FCD34D]/20 border border-[#FCD34D]/50 text-[#FCD34D] font-mono text-xs px-2 py-0.5 font-bold">{sub.grade}</span>
-                                ) : (
-                                  <span className="text-[#83aeff] font-mono text-xs">Awaiting grade</span>
-                                )}
-                              </>
-                            ) : (
-                              <span className={`font-mono text-xs ${overdue ? 'text-red-400' : 'text-white/30'}`}>
-                                {overdue ? 'NOT SUBMITTED' : 'PENDING'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+              )}
+
+              {/* ── Assignments ── */}
+              {studentInClassroom && (
+                <div className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6" style={{ imageRendering: 'pixelated' }}>
+                  <h3 className="text-lg text-white mb-4 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]" style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>ASSIGNMENTS</h3>
+                  <div className="flex items-center gap-2 mb-5">
+                    <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#FCD34D] to-transparent" />
+                    <div className="w-2 h-2 bg-[#FCD34D] rotate-45" />
+                    <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#FCD34D] to-transparent" />
                   </div>
-                )}
-              </div>
+                  {assignments.length === 0 ? (
+                    <p className="text-white/40 font-mono text-xs text-center py-4">No assignments yet.</p>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {assignments.map(a => {
+                        const sub = submissions.find(s => s.assignment_id === a.id);
+                        const overdue = a.due_date && isOverdue(a.due_date) && !sub;
+                        return (
+                          <div key={a.id} className={`bg-[#3C3C3C] border-4 ${sub?.grade ? 'border-[#FCD34D]/60' : sub ? 'border-[#72b149]/50' : overdue ? 'border-red-500/50' : 'border-white/10'} px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2`}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-mono text-xs font-bold truncate">{a.title}</p>
+                              {a.due_date && (
+                                <p className={`font-mono text-[10px] mt-0.5 ${overdue ? 'text-red-400' : 'text-white/40'}`}>
+                                  Due {fmtDate(a.due_date)}{overdue ? ' — OVERDUE' : ''}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              {sub ? (
+                                <>
+                                  <span className="text-[#72b149] font-mono text-xs flex items-center gap-1">
+                                    <CheckCircle size={11} /> Submitted {fmtDate(sub.submitted_at)}
+                                  </span>
+                                  {sub.grade ? (
+                                    <span className="bg-[#FCD34D]/20 border border-[#FCD34D]/50 text-[#FCD34D] font-mono text-xs px-2 py-0.5 font-bold">{sub.grade}</span>
+                                  ) : (
+                                    <span className="text-[#83aeff] font-mono text-xs">Awaiting grade</span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className={`font-mono text-xs ${overdue ? 'text-red-400' : 'text-white/30'}`}>
+                                  {overdue ? 'NOT SUBMITTED' : 'PENDING'}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ── Lesson progress ── */}
-              {modules.map(module => {
+              {studentInClassroom && modules.map(module => {
                 const moduleLessons = allLessons.filter(l => l.module === module);
                 const doneCount = moduleLessons.filter(l => completedIds.has(l.id)).length;
                 return (
