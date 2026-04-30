@@ -608,16 +608,22 @@ function StudentDashboard({
   const [classCodeInput, setClassCodeInput] = useState('');
   const [joinError, setJoinError] = useState('');
   const [joining, setJoining] = useState(false);
+  const [parentCode, setParentCode] = useState<string | null>(null);
+  const [parentLinked, setParentLinked] = useState(false);
+  const [parentCodeCopied, setParentCodeCopied] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       const {data: {user}} = await supabase.auth.getUser();
       if (!user) return;
 
-      const [attemptsRes, uploadedRes, memberRes] = await Promise.all([
+      const studentName: string = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
+
+      const [attemptsRes, uploadedRes, memberRes, parentLinkRes] = await Promise.all([
         supabase.from('lesson_attempts').select('lesson_id, xp_earned').eq('user_id', user.id),
         supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true }),
         supabase.from('classroom_members').select('student_name, classrooms(id, class_code, name)').eq('student_id', user.id).maybeSingle(),
+        supabase.from('parent_student_links').select('id').eq('student_id', user.id).maybeSingle(),
       ]);
 
       if (attemptsRes.data) {
@@ -629,19 +635,34 @@ function StudentDashboard({
       }
       if (memberRes.data?.classrooms) {
         setClassroom(memberRes.data.classrooms as unknown as Classroom);
-
-        // Backfill name if missing (handles Google sign-in and pre-existing members)
-        if (!memberRes.data.student_name) {
-          const studentName: string = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
-          if (studentName) {
-            await supabase
-              .from('classroom_members')
-              .update({ student_name: studentName })
-              .eq('student_id', user.id);
-          }
+        if (!memberRes.data.student_name && studentName) {
+          await supabase.from('classroom_members').update({ student_name: studentName }).eq('student_id', user.id);
         }
       }
+      setParentLinked(!!parentLinkRes.data);
       setClassroomChecked(true);
+
+      // Fetch or create parent link code
+      const { data: existingCode } = await supabase
+        .from('student_codes')
+        .select('code')
+        .eq('student_id', user.id)
+        .maybeSingle();
+
+      if (existingCode) {
+        setParentCode(existingCode.code);
+        if (studentName) {
+          supabase.from('student_codes').update({ student_name: studentName }).eq('student_id', user.id);
+        }
+      } else {
+        const newCode = generateClassCode();
+        const { data } = await supabase
+          .from('student_codes')
+          .insert({ student_id: user.id, code: newCode, student_name: studentName })
+          .select('code')
+          .single();
+        if (data) setParentCode(data.code);
+      }
     }
     fetchData();
   }, []);
@@ -771,6 +792,34 @@ function StudentDashboard({
               </div>
             </div>
           </div>
+
+          {/* Parent link code — hidden once parent is connected */}
+          {classroomChecked && !parentLinked && parentCode && (
+            <div
+              className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-5 mb-6"
+              style={{ imageRendering: 'pixelated' }}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Users size={16} className="text-[#FCD34D]" />
+                <h3 className="text-white font-mono text-sm font-bold drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]" style={{ letterSpacing: '2px' }}>
+                  CONNECT WITH PARENT
+                </h3>
+              </div>
+              <p className="text-white/50 font-mono text-xs mb-3">Share this code with your parent so they can follow your progress.</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-[#FCD34D] font-mono text-3xl font-bold tracking-[6px] drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]">
+                  {parentCode}
+                </span>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(parentCode); setParentCodeCopied(true); setTimeout(() => setParentCodeCopied(false), 2000); }}
+                  className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                >
+                  {parentCodeCopied ? <Check size={13} className="text-[#72b149]" /> : <Copy size={13} className="text-white" />}
+                  <span className="text-white font-mono text-xs">{parentCodeCopied ? 'COPIED!' : 'COPY'}</span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Classroom section */}
           {classroomChecked && (
@@ -939,6 +988,254 @@ function StudentDashboard({
   );
 }
 
+// ─── Parent Dashboard ─────────────────────────────────────────────────────────
+function ParentDashboard({ firstName, onLogout }: { firstName: string; onLogout: () => void }) {
+  const [linkedStudent, setLinkedStudent] = useState<{ student_id: string; student_name: string | null } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [codeInput, setCodeInput] = useState('');
+  const [linkError, setLinkError] = useState('');
+  const [linking, setLinking] = useState(false);
+  const [attempts, setAttempts] = useState<{ lesson_id: string; correct_count: number; total_questions: number; xp_earned: number }[]>([]);
+  const [submissions, setSubmissions] = useState<{ assignment_id: string; grade: string | null; feedback: string | null; submitted_at: string; file_name: string }[]>([]);
+  const [assignments, setAssignments] = useState<{ id: string; title: string; description: string | null; due_date: string | null }[]>([]);
+  const [uploadedLessons, setUploadedLessons] = useState<Lesson[]>([]);
+
+  async function fetchStudentData(studentId: string) {
+    const [attRes, subRes, asgRes, upRes] = await Promise.all([
+      supabase.from('lesson_attempts').select('lesson_id, correct_count, total_questions, xp_earned').eq('user_id', studentId),
+      supabase.from('assignment_submissions').select('assignment_id, grade, feedback, submitted_at, file_name').eq('user_id', studentId),
+      supabase.from('assignments').select('id, title, description, due_date').order('created_at', { ascending: false }),
+      supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true }),
+    ]);
+    setAttempts(attRes.data ?? []);
+    setSubmissions(subRes.data ?? []);
+    setAssignments(asgRes.data ?? []);
+    setUploadedLessons((upRes.data ?? []).map(r => r.lesson_data as Lesson));
+  }
+
+  useEffect(() => {
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+      const { data: link } = await supabase
+        .from('parent_student_links')
+        .select('student_id, student_name')
+        .eq('parent_id', user.id)
+        .maybeSingle();
+      if (link) {
+        setLinkedStudent(link);
+        await fetchStudentData(link.student_id);
+      }
+      setLoading(false);
+    }
+    init();
+  }, []);
+
+  async function linkStudent() {
+    const code = codeInput.trim().toUpperCase();
+    if (!code) return;
+    setLinking(true);
+    setLinkError('');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setLinking(false); return; }
+    const { data: sc } = await supabase.from('student_codes').select('student_id, student_name').eq('code', code).maybeSingle();
+    if (!sc) { setLinkError('Student code not found. Ask your child for their code.'); setLinking(false); return; }
+    const { error } = await supabase.from('parent_student_links').insert({ parent_id: user.id, student_id: sc.student_id, student_name: sc.student_name });
+    if (error) {
+      setLinkError(error.code === '23505' ? 'Already linked to this student.' : 'Failed to link. Try again.');
+    } else {
+      setLinkedStudent(sc);
+      await fetchStudentData(sc.student_id);
+    }
+    setLinking(false);
+  }
+
+  const allLessons = [...lessons, ...uploadedLessons];
+  const completedIds = new Set(attempts.map(a => a.lesson_id));
+  const totalXp = attempts.reduce((s, a) => s + a.xp_earned, 0);
+  const completedCount = completedIds.size;
+  const modules = Array.from(new Set(allLessons.map(l => l.module)));
+
+  function fmtDate(iso: string) {
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  function isOverdue(due: string) {
+    const d = new Date(due); d.setHours(23, 59, 59, 999); return d < new Date();
+  }
+
+  return (
+    <div className="min-h-screen relative bg-gradient-to-b from-[#83aeff] to-[#8fb9ff]">
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0" style={{ backgroundImage: `url('https://minecraft.wiki/images/thumb/Plains_sky.png/1200px-Plains_sky.png')`, backgroundSize: 'cover', backgroundPosition: 'center', imageRendering: 'pixelated' }} />
+      </div>
+      <div className="relative z-10 min-h-screen p-8">
+        <Sidebar onLogout={onLogout} />
+        <div className="flex justify-center mb-8">
+          <div className="flex items-center gap-4">
+            <img src="/mindCraft_logo_border.png" alt="MindCraft Logo" className="w-12 h-12" />
+            <h1 className="text-3xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]" style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>MINDCRAFT</h1>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6" style={{ imageRendering: 'pixelated' }}>
+            <h2 className="text-2xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]" style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>
+              PARENT DASHBOARD{firstName ? ` — ${firstName.toUpperCase()}` : ''}
+            </h2>
+            <p className="text-[#FCD34D] font-mono text-xs mt-1">Track your child's learning progress</p>
+          </div>
+
+          {loading ? (
+            <p className="text-white font-mono text-sm animate-pulse text-center">LOADING...</p>
+          ) : !linkedStudent ? (
+            /* ── Link student ── */
+            <div className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-8" style={{ imageRendering: 'pixelated' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <Users size={20} className="text-[#FCD34D]" />
+                <h3 className="text-white font-mono text-lg font-bold" style={{ letterSpacing: '2px' }}>LINK YOUR CHILD'S ACCOUNT</h3>
+              </div>
+              <p className="text-white/60 font-mono text-xs mb-5">Ask your child to share their parent code from their dashboard, then enter it below.</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <input
+                  value={codeInput}
+                  onChange={e => { setCodeInput(e.target.value.toUpperCase()); setLinkError(''); }}
+                  onKeyDown={e => e.key === 'Enter' && linkStudent()}
+                  maxLength={6}
+                  placeholder="XXXXXX"
+                  className="bg-[#1a1a1a] border-4 border-black text-[#FCD34D] font-mono text-xl tracking-[6px] px-4 py-2 w-48 outline-none placeholder:text-white/20 uppercase"
+                />
+                <button
+                  onClick={linkStudent}
+                  disabled={linking || codeInput.trim().length < 6}
+                  className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  <LogIn size={14} className="text-white" />
+                  <span className="text-white font-mono text-xs font-bold">{linking ? 'LINKING...' : 'LINK STUDENT'}</span>
+                </button>
+              </div>
+              {linkError && <p className="text-red-400 font-mono text-xs mt-3">{linkError}</p>}
+            </div>
+          ) : (
+            <>
+              {/* ── Student overview card ── */}
+              <div className="bg-[#3C3C3C] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <div className="w-16 h-16 bg-[#976d4c] border-4 border-black flex items-center justify-center text-white font-mono text-2xl font-bold shadow-[4px_4px_0px_black] shrink-0">
+                  {(linkedStudent.student_name ?? '?').charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1">
+                  <p className="text-white font-mono text-xl font-bold">{linkedStudent.student_name ?? 'Student'}</p>
+                  <p className="text-white/40 font-mono text-xs mt-0.5">LINKED STUDENT</p>
+                </div>
+                <div className="flex gap-4">
+                  <div className="bg-[#2a2a2a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_black]">
+                    <p className="text-[#FCD34D] font-mono text-xl font-bold">{totalXp}</p>
+                    <p className="text-white/40 font-mono text-xs">TOTAL XP</p>
+                  </div>
+                  <div className="bg-[#2a2a2a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_black]">
+                    <p className="text-[#72b149] font-mono text-xl font-bold">{completedCount}/{allLessons.length}</p>
+                    <p className="text-white/40 font-mono text-xs">LESSONS</p>
+                  </div>
+                  <div className="bg-[#2a2a2a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_black]">
+                    <p className="text-[#83aeff] font-mono text-xl font-bold">{submissions.filter(s => s.grade).length}/{assignments.length}</p>
+                    <p className="text-white/40 font-mono text-xs">GRADED</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Assignments ── */}
+              <div className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6" style={{ imageRendering: 'pixelated' }}>
+                <h3 className="text-lg text-white mb-4 drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]" style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>ASSIGNMENTS</h3>
+                <div className="flex items-center gap-2 mb-5">
+                  <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#FCD34D] to-transparent" />
+                  <div className="w-2 h-2 bg-[#FCD34D] rotate-45" />
+                  <div className="flex-1 h-1 bg-gradient-to-r from-transparent via-[#FCD34D] to-transparent" />
+                </div>
+                {assignments.length === 0 ? (
+                  <p className="text-white/40 font-mono text-xs text-center py-4">No assignments yet.</p>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {assignments.map(a => {
+                      const sub = submissions.find(s => s.assignment_id === a.id);
+                      const overdue = a.due_date && isOverdue(a.due_date) && !sub;
+                      return (
+                        <div key={a.id} className={`bg-[#3C3C3C] border-4 ${sub?.grade ? 'border-[#FCD34D]/60' : sub ? 'border-[#72b149]/50' : overdue ? 'border-red-500/50' : 'border-white/10'} px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-2`}>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-mono text-xs font-bold truncate">{a.title}</p>
+                            {a.due_date && (
+                              <p className={`font-mono text-[10px] mt-0.5 ${overdue ? 'text-red-400' : 'text-white/40'}`}>
+                                Due {fmtDate(a.due_date)}{overdue ? ' — OVERDUE' : ''}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0">
+                            {sub ? (
+                              <>
+                                <span className="text-[#72b149] font-mono text-xs flex items-center gap-1">
+                                  <CheckCircle size={11} /> Submitted {fmtDate(sub.submitted_at)}
+                                </span>
+                                {sub.grade ? (
+                                  <span className="bg-[#FCD34D]/20 border border-[#FCD34D]/50 text-[#FCD34D] font-mono text-xs px-2 py-0.5 font-bold">{sub.grade}</span>
+                                ) : (
+                                  <span className="text-[#83aeff] font-mono text-xs">Awaiting grade</span>
+                                )}
+                              </>
+                            ) : (
+                              <span className={`font-mono text-xs ${overdue ? 'text-red-400' : 'text-white/30'}`}>
+                                {overdue ? 'NOT SUBMITTED' : 'PENDING'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* ── Lesson progress ── */}
+              {modules.map(module => {
+                const moduleLessons = allLessons.filter(l => l.module === module);
+                const doneCount = moduleLessons.filter(l => completedIds.has(l.id)).length;
+                return (
+                  <div key={module} className="bg-gradient-to-br from-[#976d4c] to-[#7b583d] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6" style={{ imageRendering: 'pixelated' }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)]" style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>{module} LESSONS</h3>
+                      <span className="text-[#72b149] font-mono text-sm font-bold">{doneCount}/{moduleLessons.length}</span>
+                    </div>
+                    <div className="h-3 bg-black/40 border-2 border-black mb-4">
+                      <div className="h-full bg-[#72b149]" style={{ width: `${(doneCount / moduleLessons.length) * 100}%` }} />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      {moduleLessons.map(lesson => {
+                        const done = completedIds.has(lesson.id);
+                        const att = attempts.find(a => a.lesson_id === lesson.id);
+                        const pct = att && att.total_questions > 0 ? Math.round((att.correct_count / att.total_questions) * 100) : null;
+                        return (
+                          <div key={lesson.id} className={`flex items-center gap-3 px-3 py-2 border-2 ${done ? 'border-[#72b149]/40 bg-[#72b149]/10' : 'border-black/30 bg-black/20'}`}>
+                            <div className={`w-4 h-4 border-2 border-black flex items-center justify-center shrink-0 ${done ? 'bg-[#72b149]' : 'bg-white/10'}`}>
+                              {done && <CheckCircle size={10} className="text-white" />}
+                            </div>
+                            <span className="text-white font-mono text-xs flex-1 truncate">{lesson.title}</span>
+                            {pct !== null && (
+                              <span className={`font-mono text-xs font-bold shrink-0 ${pct >= 80 ? 'text-[#72b149]' : pct >= 50 ? 'text-[#FCD34D]' : 'text-red-400'}`}>{pct}%</span>
+                            )}
+                            <span className="text-[#FCD34D] font-mono text-xs shrink-0">+{lesson.xp} XP</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Dashboard (role router) ──────────────────────────────────────────────────
 export function Dashboard() {
   const navigate = useNavigate();
@@ -971,9 +1268,7 @@ export function Dashboard() {
     );
   }
 
-  if (role === 'teacher') {
-    return <TeacherDashboard firstName={firstName} onLogout={handleLogout} />;
-  }
-
+  if (role === 'teacher') return <TeacherDashboard firstName={firstName} onLogout={handleLogout} />;
+  if (role === 'parent') return <ParentDashboard firstName={firstName} onLogout={handleLogout} />;
   return <StudentDashboard firstName={firstName} role={role} onLogout={handleLogout} />;
 }
