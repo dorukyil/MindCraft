@@ -124,10 +124,12 @@ function TeacherDashboard({
   const [assignmentRefreshKey, setAssignmentRefreshKey] = useState(0);
 
   const [classroom, setClassroom] = useState<(Classroom & { student_count: number }) | null>(null);
-
   const [classroomLoading, setClassroomLoading] = useState(true);
-
   const [codeCopied, setCodeCopied] = useState(false);
+  const [classroomNameInput, setClassroomNameInput] = useState('');
+  const [showRoster, setShowRoster] = useState(false);
+  const [roster, setRoster] = useState<{ student_name: string | null; joined_at: string }[]>([]);
+  const [rosterLoading, setRosterLoading] = useState(false);
 
   async function fetchUploadedLessons() {
     const { data } = await supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true });
@@ -142,7 +144,7 @@ function TeacherDashboard({
       .from('classrooms')
       .select('id, class_code, name')
       .eq('teacher_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (data) {
       const { count } = await supabase
@@ -154,17 +156,34 @@ function TeacherDashboard({
     setClassroomLoading(false);
   }
 
+  async function fetchRoster(classroomId: string) {
+    setRosterLoading(true);
+    const { data } = await supabase
+      .from('classroom_members')
+      .select('student_name, joined_at')
+      .eq('classroom_id', classroomId)
+      .order('joined_at', { ascending: true });
+    setRoster(data ?? []);
+    setRosterLoading(false);
+  }
+
   async function createClassroom() {
+    const name = classroomNameInput.trim() || 'My Classroom';
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
     const code = generateClassCode();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('classrooms')
-      .insert({ teacher_id: user.id, class_code: code, name: 'My Classroom' })
+      .insert({ teacher_id: user.id, class_code: code, name })
       .select('id, class_code, name')
       .single();
 
+    if (error) {
+      console.error('createClassroom error:', error);
+      alert(`Failed to create classroom: ${error.message}`);
+      return;
+    }
     if (data) setClassroom({ ...data, student_count: 0 });
   }
 
@@ -173,6 +192,12 @@ function TeacherDashboard({
     navigator.clipboard.writeText(classroom.class_code);
     setCodeCopied(true);
     setTimeout(() => setCodeCopied(false), 2000);
+  }
+
+  function toggleRoster() {
+    if (!classroom) return;
+    if (!showRoster) fetchRoster(classroom.id);
+    setShowRoster(r => !r);
   }
 
   useEffect(() => {
@@ -344,7 +369,7 @@ function TeacherDashboard({
             </div>
           </div>
 
-          {/* Classroom code section */}
+          {/* Classroom section */}
           <div
             className="bg-gradient-to-br from-[#3C3C3C] to-[#2a2a2a] border-8 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6 mb-6"
             style={{ imageRendering: 'pixelated' }}
@@ -362,39 +387,86 @@ function TeacherDashboard({
             {classroomLoading ? (
               <p className="text-white/40 font-mono text-xs animate-pulse">LOADING...</p>
             ) : classroom ? (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div>
-                  <p className="text-white/50 font-mono text-xs mb-1">SHARE THIS CODE WITH YOUR STUDENTS</p>
+              <>
+                {/* Code + stats row */}
+                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                  <div className="flex-1">
+                    <p className="text-white/50 font-mono text-xs mb-1">{classroom.name.toUpperCase()} — SHARE THIS CODE WITH YOUR STUDENTS</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="text-[#FCD34D] font-mono text-4xl font-bold drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] tracking-[8px]">
+                        {classroom.class_code}
+                      </span>
+                      <button
+                        onClick={copyCode}
+                        className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                      >
+                        {codeCopied ? <Check size={14} className="text-[#72b149]" /> : <Copy size={14} className="text-white" />}
+                        <span className="text-white font-mono text-xs">{codeCopied ? 'COPIED!' : 'COPY'}</span>
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex items-center gap-3">
-                    <span
-                      className="text-[#FCD34D] font-mono text-4xl font-bold drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] tracking-[8px]"
-                    >
-                      {classroom.class_code}
-                    </span>
+                    <div className="bg-[#1a1a1a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
+                      <p className="text-[#83aeff] font-mono text-xl font-bold">{classroom.student_count}</p>
+                      <p className="text-white/60 font-mono text-xs">ENROLLED</p>
+                    </div>
                     <button
-                      onClick={copyCode}
-                      className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                      onClick={toggleRoster}
+                      className="flex items-center gap-2 bg-[#83aeff] border-4 border-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
                     >
-                      {codeCopied ? <Check size={14} className="text-[#72b149]" /> : <Copy size={14} className="text-white" />}
-                      <span className="text-white font-mono text-xs">{codeCopied ? 'COPIED!' : 'COPY'}</span>
+                      <Users size={14} className="text-black" />
+                      <span className="text-black font-mono text-xs font-bold">{showRoster ? 'HIDE ROSTER' : 'VIEW ROSTER'}</span>
                     </button>
                   </div>
                 </div>
-                <div className="sm:ml-auto bg-[#2a2a2a] border-4 border-black px-4 py-2 text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]">
-                  <p className="text-[#83aeff] font-mono text-xl font-bold">{classroom.student_count}</p>
-                  <p className="text-white/60 font-mono text-xs">STUDENTS ENROLLED</p>
-                </div>
-              </div>
+
+                {/* Roster */}
+                {showRoster && (
+                  <div className="mt-4 border-t-4 border-black/40 pt-4">
+                    <p className="text-white/50 font-mono text-xs mb-3">CLASS ROSTER</p>
+                    {rosterLoading ? (
+                      <p className="text-white/40 font-mono text-xs animate-pulse">LOADING...</p>
+                    ) : roster.length === 0 ? (
+                      <p className="text-white/30 font-mono text-xs">No students have joined yet.</p>
+                    ) : (
+                      <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
+                        {roster.map((s, i) => (
+                          <div key={i} className="flex items-center justify-between bg-[#1a1a1a] border-2 border-black px-3 py-2">
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 bg-[#976d4c] border-2 border-black flex items-center justify-center text-white font-mono text-xs font-bold">
+                                {(s.student_name ?? '?').charAt(0).toUpperCase()}
+                              </div>
+                              <span className="text-white font-mono text-xs">{s.student_name ?? 'Unknown'}</span>
+                            </div>
+                            <span className="text-white/30 font-mono text-[10px]">
+                              Joined {new Date(s.joined_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <p className="text-white/60 font-mono text-xs">You don't have a classroom yet. Create one to get a shareable code.</p>
-                <button
-                  onClick={createClassroom}
-                  className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110 whitespace-nowrap"
-                >
-                  <School size={14} className="text-white" />
-                  <span className="text-white font-mono text-xs font-bold">CREATE CLASSROOM</span>
-                </button>
+              <div className="flex flex-col gap-4">
+                <p className="text-white/60 font-mono text-xs">Create a classroom to get a shareable code for your students.</p>
+                <div className="flex flex-col sm:flex-row gap-3 items-start">
+                  <input
+                    value={classroomNameInput}
+                    onChange={e => setClassroomNameInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && createClassroom()}
+                    placeholder="CLASS NAME (e.g. Period 3 English)"
+                    className="bg-[#1a1a1a] border-4 border-black text-white font-mono text-sm px-3 py-2 outline-none placeholder:text-white/20 flex-1 min-w-0"
+                  />
+                  <button
+                    onClick={createClassroom}
+                    className="flex items-center gap-2 bg-[#72b149] border-4 border-black px-4 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110 whitespace-nowrap"
+                  >
+                    <School size={14} className="text-white" />
+                    <span className="text-white font-mono text-xs font-bold">CREATE CLASSROOM</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -545,9 +617,11 @@ function StudentDashboard({
       return;
     }
 
+    const studentName: string = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
+
     const { error } = await supabase
       .from('classroom_members')
-      .insert({ classroom_id: room.id, student_id: user.id });
+      .insert({ classroom_id: room.id, student_id: user.id, student_name: studentName });
 
     if (error) {
       setJoinError(error.code === '23505' ? 'You already joined this class.' : 'Failed to join. Try again.');
