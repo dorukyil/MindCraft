@@ -4,6 +4,7 @@ import { ArrowLeft, Star, BookOpen, Target, ClipboardList, CheckCircle, Clock } 
 import { supabase } from '../lib/supabase/client';
 import { lessons } from '../../data/lessons';
 import { MinecraftButton } from '../components/MinecraftButton';
+import { Sidebar } from '../components/Sidebar';
 
 interface Attempt {
   lesson_id: string;
@@ -113,12 +114,15 @@ export function Profile() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#83aeff] to-[#8fb9ff] p-6">
+      {/* Sidebar */}
+        <Sidebar onLogout={() => navigate('/')} />
+
       {/* Back to dashboard button */}
-      <div className="flex items-center gap-4 mb-8">
+      <div className="mb-6">
         <MinecraftButton
           onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 font-mono text-xl transition-colors">
-          <ArrowLeft size={16} />
+          className="flex items-center gap-2 font-mono text-sm">
+          <ArrowLeft size={14} />
           DASHBOARD
         </MinecraftButton>
       </div>
