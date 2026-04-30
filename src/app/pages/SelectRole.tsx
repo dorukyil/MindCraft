@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase/client';
 
 export function SelectRole() {
   const navigate = useNavigate();
-  const [role, setRole] = useState<'student' | 'teacher'>('student');
+  const [role, setRole] = useState<'student' | 'teacher' | 'parent'>('student');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +53,7 @@ export function SelectRole() {
             </div>
 
             <div className="flex border-4 border-black overflow-hidden mb-5">
-              {(['student', 'teacher'] as const).map((r) => (
+              {(['student', 'teacher', 'parent'] as const).map((r) => (
                 <button
                   key={r}
                   type="button"

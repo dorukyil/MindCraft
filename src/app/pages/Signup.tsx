@@ -15,7 +15,7 @@ export function Signup() {
     password: '',
     confirmPassword: ''
   });
-  const [role, setRole] = useState<'student' | 'teacher'>('student');
+  const [role, setRole] = useState<'student' | 'teacher' | 'parent'>('student');
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -146,7 +146,7 @@ export function Signup() {
               <form onSubmit={handleSubmit} className="space-y-2">
                 {/* Role selector */}
                 <div className="flex border-4 border-black overflow-hidden mb-2.5">
-                  {(['student', 'teacher'] as const).map((r) => (
+                  {(['student', 'teacher', 'parent'] as const).map((r) => (
                     <button
                       key={r}
                       type="button"
