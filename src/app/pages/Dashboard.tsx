@@ -578,7 +578,7 @@ function StudentDashboard({
       const [attemptsRes, uploadedRes, memberRes] = await Promise.all([
         supabase.from('lesson_attempts').select('lesson_id, xp_earned').eq('user_id', user.id),
         supabase.from('uploaded_lessons').select('lesson_data').order('created_at', { ascending: true }),
-        supabase.from('classroom_members').select('classrooms(id, class_code, name)').eq('student_id', user.id).maybeSingle(),
+        supabase.from('classroom_members').select('student_name, classrooms(id, class_code, name)').eq('student_id', user.id).maybeSingle(),
       ]);
 
       if (attemptsRes.data) {
@@ -590,6 +590,17 @@ function StudentDashboard({
       }
       if (memberRes.data?.classrooms) {
         setClassroom(memberRes.data.classrooms as unknown as Classroom);
+
+        // Backfill name if missing (handles Google sign-in and pre-existing members)
+        if (!memberRes.data.student_name) {
+          const studentName: string = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
+          if (studentName) {
+            await supabase
+              .from('classroom_members')
+              .update({ student_name: studentName })
+              .eq('student_id', user.id);
+          }
+        }
       }
       setClassroomChecked(true);
     }
