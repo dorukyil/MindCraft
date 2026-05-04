@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload, ClipboardList, Copy, Check, LogIn, School } from 'lucide-react';
+import { BookOpen, Clock, CheckCircle, Lock, Users, BarChart2, Upload, ClipboardList, Copy, Check, LogIn, School, Eye, EyeOff } from 'lucide-react';
 import { lessons } from '../../data/lessons';
 import type { Lesson } from '../../data/lessons';
 import { supabase } from '../lib/supabase/client';
@@ -126,6 +126,7 @@ function TeacherDashboard({
   const [classroom, setClassroom] = useState<(Classroom & { student_count: number }) | null>(null);
   const [classroomLoading, setClassroomLoading] = useState(true);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [codeVisible, setCodeVisible] = useState(false);
   const [classroomNameInput, setClassroomNameInput] = useState('');
   const [editingName, setEditingName] = useState(false);
   const [renamingName, setRenamingName] = useState('');
@@ -433,8 +434,17 @@ function TeacherDashboard({
                     )}
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="text-[#FCD34D] font-mono text-4xl font-bold drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] tracking-[8px]">
-                        {classroom.class_code}
+                        {codeVisible ? classroom.class_code : '••••••'}
                       </span>
+                      <button
+                        onClick={() => setCodeVisible(!codeVisible)}
+                        className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
+                        title={codeVisible ? 'Hide code' : 'Show code'}
+                      >
+                        {codeVisible
+                          ? <EyeOff size={14} className="text-white/60" />
+                          : <Eye size={14} className="text-white/60" />}
+                      </button>
                       <button
                         onClick={copyCode}
                         className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
@@ -611,6 +621,8 @@ function StudentDashboard({
   const [parentCode, setParentCode] = useState<string | null>(null);
   const [parentLinked, setParentLinked] = useState(false);
   const [parentCodeCopied, setParentCodeCopied] = useState(false);
+  const [parentCodeVisible, setParentCodeVisible] = useState(false); 
+
 
   useEffect(() => {
     async function fetchData() {
@@ -808,8 +820,17 @@ function StudentDashboard({
               <p className="text-white/50 font-mono text-xs mb-3">Share this code with your parent so they can follow your progress.</p>
               <div className="flex items-center gap-3 flex-wrap">
                 <span className="text-[#FCD34D] font-mono text-3xl font-bold tracking-[6px] drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]">
-                  {parentCode}
+                  {parentCodeVisible ? parentCode : '••••••'}
                 </span>
+                <button
+                  onClick={() => setParentCodeVisible(v => !v)}
+                  className="flex items-center gap-1 bg-[#2a2a2a] border-4 border-black px-3 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] hover:brightness-110 transition-all"
+                  title={parentCodeVisible ? 'Hide code' : 'Show code'}
+                >
+                  {parentCodeVisible
+                    ? <EyeOff size={13} className="text-white/60" />
+                    : <Eye size={13} className="text-white/60" />}
+                </button>
                 <button
                   onClick={() => { navigator.clipboard.writeText(parentCode); setParentCodeCopied(true); setTimeout(() => setParentCodeCopied(false), 2000); }}
                   className="flex items-center gap-2 bg-[#976d4c] border-4 border-black px-3 py-1.5 shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] active:shadow-none active:translate-x-[2px] active:translate-y-[2px] transition-all hover:brightness-110"
