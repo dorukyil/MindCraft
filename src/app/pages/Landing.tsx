@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router';
 import { MinecraftButton } from '../components/MinecraftButton';
 import { AdinkraPattern } from '../components/AdinkraPattern';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { BookOpen, Pickaxe, Users, Target, Zap } from 'lucide-react';
+import { BookOpen, Pickaxe, Users, Target, Zap, Mail, MapPin, MessageSquare } from 'lucide-react';
 
 export function Landing() {
   const navigate = useNavigate();
@@ -221,6 +221,105 @@ export function Landing() {
                   CREATE ACCOUNT
                 </div>
               </MinecraftButton>
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Us Section */}
+        <section className="px-8 py-16 bg-gradient-to-br from-[#1a1a2e] to-[#2d2d44] border-y-8 border-black">
+          <div className="max-w-7xl mx-auto">
+            <h3
+              className="text-4xl text-white drop-shadow-[4px_4px_0px_rgba(0,0,0,0.8)] mb-2 text-center"
+              style={{ fontFamily: 'monospace', letterSpacing: '2px' }}
+            >
+              CONTACT US
+            </h3>
+            <p className="text-white/70 font-mono text-sm text-center mb-10 drop-shadow-[2px_2px_1px_rgba(0,0,0,0.8)]">
+              Have questions? We'd love to hear from you!
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-10 items-start">
+
+              {/* Contact Info Cards */}
+              <div className="flex flex-col gap-4">
+                {/* Email */}
+                <div className="bg-[#3C3C3C] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#72b149] border-2 border-black flex items-center justify-center shrink-0">
+                    <Mail className="text-white" size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-mono text-sm font-bold mb-1">EMAIL US</h4>
+                    <p className="text-white/60 font-mono text-sm">hello@mindcraft.edu</p>
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="bg-[#3C3C3C] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#D97706] border-2 border-black flex items-center justify-center shrink-0">
+                    <MapPin className="text-white" size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-mono text-sm font-bold mb-1">FIND US</h4>
+                    <p className="text-white/60 font-mono text-sm">Sierra Leone 🌍</p>
+                  </div>
+                </div>
+
+                {/* Support */}
+                <div className="bg-[#3C3C3C] border-4 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)] p-5 flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#FCD34D] border-2 border-black flex items-center justify-center shrink-0">
+                    <MessageSquare className="text-black" size={22} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-mono text-sm font-bold mb-1">SUPPORT</h4>
+                    <p className="text-white/60 font-mono text-sm">support@mindcraft.edu</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Placeholder Form */}
+              <div className="bg-[#3C3C3C] border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,0.8)] p-6">
+                <h4
+                  className="text-white font-mono text-lg font-bold mb-5 drop-shadow-[2px_2px_0px_rgba(0,0,0,0.8)]"
+                  style={{ letterSpacing: '1px' }}
+                >
+                  SEND A MESSAGE
+                </h4>
+
+                {/* Name field */}
+                <div className="mb-4">
+                  <label className="block text-white/70 font-mono text-xs mb-1 uppercase">Your Name</label>
+                  <div className="w-full h-10 bg-[#1a1a1a] border-4 border-black shadow-[inset_2px_2px_0px_rgba(0,0,0,0.5)] px-3 flex items-center">
+                    <span className="text-white/30 font-mono text-sm">Steve_Learner</span>
+                  </div>
+                </div>
+
+                {/* Email field */}
+                <div className="mb-4">
+                  <label className="block text-white/70 font-mono text-xs mb-1 uppercase">Email Address</label>
+                  <div className="w-full h-10 bg-[#1a1a1a] border-4 border-black shadow-[inset_2px_2px_0px_rgba(0,0,0,0.5)] px-3 flex items-center">
+                    <span className="text-white/30 font-mono text-sm">you@example.com</span>
+                  </div>
+                </div>
+
+                {/* Message field */}
+                <div className="mb-6">
+                  <label className="block text-white/70 font-mono text-xs mb-1 uppercase">Message</label>
+                  <div className="w-full h-24 bg-[#1a1a1a] border-4 border-black shadow-[inset_2px_2px_0px_rgba(0,0,0,0.5)] px-3 py-2 flex items-start">
+                    <span className="text-white/30 font-mono text-sm">Write your message here...</span>
+                  </div>
+                </div>
+
+                <MinecraftButton onClick={() => {}} className="w-full !bg-[#72b149] justify-center">
+                  <div className="flex items-center gap-2 justify-center">
+                    <Mail size={16} />
+                    SEND MESSAGE
+                  </div>
+                </MinecraftButton>
+
+                <p className="text-white/30 font-mono text-xs text-center mt-3">
+                   Form functionality coming soon!
+                </p>
+              </div>
             </div>
           </div>
         </section>
